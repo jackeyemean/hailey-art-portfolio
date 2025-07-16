@@ -1,13 +1,12 @@
-/node_modules
+# dependencies
+node_modules/
 
-/dist
-/build
+# build output
+dist/
+build/
 
+# env files
 .env*
 
-.vscode/
-*.swp
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# personal
+*.txt
