@@ -1,0 +1,10 @@
+model Artwork {
+  id          String   @id @default(uuid())     // UUID primary key
+  title       String                             // Required
+  description String?                            // Optional
+  imageUrl    String                             // Will point to S3 later
+  collection  String                             // e.g. "Landscapes"
+  medium      String                             // e.g. "Oil on canvas"
+  dimensions  String                             // e.g. "30x40 in"
+  createdAt   DateTime @default(now())           // Timestamp
+}
