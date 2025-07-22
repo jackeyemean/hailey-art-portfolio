@@ -1,8 +1,8 @@
 // src/routes/artwork.ts
 import express from "express";
 import multer from "multer";
-import prisma from "../client";              // ← Pull in your PrismaClient instance
-import { uploadToS3 } from "../s3";          // ← Adjust path if needed
+import prisma from "../client";
+import { uploadToS3 } from "../s3";
 
 const router = express.Router();
 const upload = multer();
