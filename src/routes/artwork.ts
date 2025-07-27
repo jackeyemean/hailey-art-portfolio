@@ -3,14 +3,15 @@ import express from "express";
 import multer from "multer";
 import prisma from "../client";
 import { uploadToS3, deleteFromS3 } from "../s3";
+import { requireAdminKey } from "../requireAdminKey";
 
 const router = express.Router();
-// In-memory so we can get a Buffer
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Create
 router.post(
   "/artworks",
+  requireAdminKey,
   upload.single("image"),
   async (req, res, next) => {
     try {
@@ -64,7 +65,10 @@ router.get("/artworks/:id", async (req, res, next) => {
 });
 
 // Delete
-router.delete("/artworks/:id", async (req, res, next) => {
+router.delete(
+  "/artworks/:id",
+  requireAdminKey,           // ← protect this
+  async (req, res, next) => {
   try {
     const { id } = req.params;
 
