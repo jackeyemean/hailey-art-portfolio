@@ -2,7 +2,7 @@
 import express from "express";
 import multer from "multer";
 import prisma from "../client";
-import { uploadToS3 } from "../s3";
+import { uploadToS3, deleteFromS3 } from "../s3";
 
 const router = express.Router();
 // In-memory so we can get a Buffer
@@ -66,8 +66,24 @@ router.get("/artworks/:id", async (req, res, next) => {
 // Delete
 router.delete("/artworks/:id", async (req, res, next) => {
   try {
-    await prisma.artwork.delete({ where: { id: req.params.id } });
-    res.sendStatus(204);
+    const { id } = req.params;
+
+    const art = await prisma.artwork.findUnique({ where: { id } });
+    if (!art) return res.status(404).json({ success: false, message: "Not found" });
+
+    // derive S3 key
+    const url = new URL(art.imageUrl);
+    const key = url.pathname.slice(1);
+
+    await deleteFromS3(key);
+    await prisma.artwork.delete({ where: { id } });
+
+    return res.status(200).json({
+      success: true,
+      id,
+      deletedImageKey: key,
+      imageUrl: art.imageUrl,
+    });
   } catch (err) {
     next(err);
   }
