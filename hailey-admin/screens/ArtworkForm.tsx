@@ -13,11 +13,9 @@ import {
 import * as ImagePicker from 'expo-image-picker'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../types'
-import { API_URL } from '../constants'
+import { API_URL, BUCKET_URL } from '../constants'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Form'>
-
-const BUCKET_URL = 'https://hailey-art-portfolio-uploads.s3.amazonaws.com'
 
 export default function ArtworkForm({ route, navigation }: Props) {
   const { artworkId, adminKey } = route.params

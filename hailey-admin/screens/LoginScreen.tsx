@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ADMIN_KEY } from '../constants';
 import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
@@ -7,7 +8,6 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 export default function LoginScreen({ navigation }: Props) {
   const [key, setKey] = useState('');
-
   const handleLogin = () => {
     if (!key.trim()) {
       return Alert.alert('Please enter the admin key.');
