@@ -64,6 +64,57 @@ router.get("/artworks/:id", async (req, res, next) => {
   }
 });
 
+// UPDATE a record, optionally replace its image
+router.put(
+  "/artworks/:id",
+  requireAdminKey,
+  upload.single("image"),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const {
+        title,
+        description,
+        collection,
+        medium,
+        dimensions,
+      } = req.body;
+
+      // fetch record
+      const existing = await prisma.artwork.findUnique({ where: { id } });
+      if (!existing) return res.sendStatus(404);
+
+      let imageUrl = existing.imageUrl;
+
+      // if new pic uploaded, delete old & upload new pic
+      if (req.file) {
+        const oldKey = new URL(existing.imageUrl).pathname.slice(1);
+        await deleteFromS3(oldKey);
+
+        const { buffer, originalname, mimetype } = req.file;
+        imageUrl = await uploadToS3(buffer, originalname, mimetype);
+      }
+
+      // update all fields
+      const updated = await prisma.artwork.update({
+        where: { id },
+        data: {
+          title,
+          description,
+          collection,
+          medium,
+          dimensions,
+          imageUrl,
+        },
+      });
+
+      res.json(updated);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 // Delete
 router.delete(
   "/artworks/:id",
