@@ -1,12 +1,10 @@
-# dependencies
 node_modules/
-
-# build output
 dist/
 build/
-
-# env files
 .env*
+.next/
+out/
+node_modules/
 
 # personal
 *.txt
