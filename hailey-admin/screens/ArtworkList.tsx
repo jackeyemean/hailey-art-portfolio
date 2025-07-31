@@ -14,7 +14,12 @@ import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../types';
 import { API_URL } from '../constants';
 
-type Artwork = { id: string; title: string; imageUrl: string };
+type Artwork = { 
+  id: string; 
+  title: string; 
+  imageUrl: string; 
+  isArtistPick: boolean;
+};
 type Props = NativeStackScreenProps<RootStackParamList, 'List'>;
 
 export default function ArtworkList({ route, navigation }: Props) {
@@ -73,7 +78,14 @@ export default function ArtworkList({ route, navigation }: Props) {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.item}>
-            <Text style={styles.title}>{item.title}</Text>
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>{item.title}</Text>
+              {item.isArtistPick && (
+                <View style={styles.artistPickBadge}>
+                  <Text style={styles.artistPickText}>Artist's Pick</Text>
+                </View>
+              )}
+            </View>
             <View style={styles.buttonGroup}>
               <TouchableOpacity
                 style={styles.smallButton}
@@ -119,10 +131,27 @@ const createListStyles = (isDark: boolean) =>
       marginBottom: 12,
       paddingHorizontal: 16,
     },
+    titleContainer: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
     title: {
       fontSize: 16,
       color: isDark ? '#fff' : '#000',
       flex: 1,
+    },
+    artistPickBadge: {
+      backgroundColor: isDark ? '#0A84FF' : '#007AFF',
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 4,
+      marginLeft: 8,
+    },
+    artistPickText: {
+      color: '#fff',
+      fontSize: 10,
+      fontWeight: '600',
     },
     buttonGroup: {
       flexDirection: 'row',

@@ -10,6 +10,7 @@ import {
   Alert,
   Text,
   useColorScheme,
+  Switch,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -28,6 +29,7 @@ export default function ArtworkForm({ route, navigation }: Props) {
   const [collection, setCollection]   = useState('');
   const [medium, setMedium]           = useState('');
   const [dimensions, setDimensions]   = useState('');
+  const [isArtistPick, setIsArtistPick] = useState(false);
   const [uri, setUri]                 = useState<string | null>(null);
   const [isNewImage, setIsNewImage]   = useState(false);
 
@@ -43,6 +45,7 @@ export default function ArtworkForm({ route, navigation }: Props) {
         setCollection(art.collection);
         setMedium(art.medium);
         setDimensions(art.dimensions);
+        setIsArtistPick(art.isArtistPick || false);
         const existing = art.imageUrl.startsWith('http')
           ? art.imageUrl
           : `${BUCKET_URL}/${art.imageUrl}`;
@@ -80,6 +83,7 @@ export default function ArtworkForm({ route, navigation }: Props) {
     form.append('collection', collection.trim());
     form.append('medium', medium.trim());
     form.append('dimensions', dimensions.trim());
+    form.append('isArtistPick', isArtistPick.toString());
 
     const url = artworkId
       ? `${API_URL}/artworks/${artworkId}`
@@ -198,6 +202,25 @@ export default function ArtworkForm({ route, navigation }: Props) {
           />
         </View>
 
+        {/* Artist's Pick Toggle */}
+        <View style={styles.inputGroup}>
+          <View style={styles.switchContainer}>
+            <Text style={styles.label}>Set as Artist's Pick</Text>
+            <Switch
+              value={isArtistPick}
+              onValueChange={setIsArtistPick}
+              trackColor={{ false: isDark ? '#333' : '#ccc', true: isDark ? '#0A84FF' : '#007AFF' }}
+              thumbColor={isArtistPick ? '#fff' : isDark ? '#666' : '#f4f3f4'}
+            />
+          </View>
+          <Text style={styles.helperText}>
+            {isArtistPick 
+              ? "This artwork will be featured on the homepage. Any existing artist's pick will be unset."
+              : "Enable to feature this artwork on the homepage"
+            }
+          </Text>
+        </View>
+
         {/* Image picker */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={pickImage}>
@@ -264,6 +287,17 @@ const createStyles = (isDark: boolean) =>
       fontSize: 14,
     },
     placeholder: { color: isDark ? '#888' : '#888' },
+    switchContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 4,
+    },
+    helperText: {
+      color: isDark ? '#888' : '#666',
+      fontSize: 12,
+      fontStyle: 'italic',
+    },
     preview: {
       width: '100%',
       height: 120,
