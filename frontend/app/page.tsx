@@ -64,12 +64,14 @@ export default async function HomePage() {
                 </div>
               )}
               
-              <div className="space-y-1">
-                <p className="body-medium">View More From</p>
-                <p className="heading-small">
-                  {artistPick?.collection ? `The ${artistPick.collection} Collection` : ' Collection'}
-                </p>
-              </div>
+              {artistPick?.collection && (
+                <Link href={`/collection/${artistPick.collection}`} className="space-y-1 block">
+                  <p className="body-medium">View More From</p>
+                  <p className="heading-small">
+                    The {artistPick.collection} Collection
+                  </p>
+                </Link>
+              )}
             </div>
             
             {/* Right Section - Collections */}
