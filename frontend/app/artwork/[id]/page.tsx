@@ -1,80 +1,83 @@
 import Link from 'next/link';
-import Image from 'next/image';
-import { fetchArtwork } from '@/lib/api';
-import { notFound } from 'next/navigation';
-
-interface ArtworkPageProps {
-  params: {
-    id: string;
-  };
-}
+import { fetchArtworks } from '@/lib/api';
+import { Artwork } from '@/types/artwork';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-export default async function ArtworkPage({ params }: ArtworkPageProps) {
-  try {
-    const artwork = await fetchArtwork(params.id);
-    
+export default async function ArtworkPage({ 
+  params 
+}: { 
+  params: { id: string } 
+}) {
+  const artworks = await fetchArtworks();
+  const artwork = artworks.find(art => art.id === params.id);
+
+  if (!artwork) {
     return (
-      <div className="min-h-screen bg-light-gray">
-        <div className="px-6 py-6">
-          <Link href="/" className="text-dark-gray hover:text-accent-pink transition-colors">
+      <div className="min-h-screen bg-[#DFE2E4] flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="heading-medium mb-4">Artwork not found</h1>
+          <Link href="/" className="back-link">
             Back to Home
           </Link>
         </div>
-        
-        <main className="px-6 pb-12">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              
-              {/* Left - Artwork Image */}
-              <div className="relative aspect-square bg-black rounded-lg overflow-hidden border-2 border-blue-500">
-                <Image
-                  src={artwork.imageUrl}
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#DFE2E4]">
+      <div className="px-2 py-8">
+        <Link href="/" className="back-link">
+          Back to Home
+        </Link>
+      </div>
+      
+      <main className="px-2 pb-12 pt-8">
+        <div className="w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-40 lg:gap-48">
+            
+            {/* Left Section - Artwork Image */}
+            <div className="space-y-8">
+              <div className="w-full h-[80vh]">
+                <img 
+                  src={artwork.imageUrl} 
                   alt={artwork.title}
-                  fill
-                  className="object-contain"
+                  className="w-full h-full object-contain"
                 />
               </div>
+            </div>
+            
+            {/* Right Section - Artwork Details */}
+            <div className="space-y-8">
+              <div className="space-y-6">
+                <h1 className="heading-large leading-tight">
+                  "{artwork.title}"
+                </h1>
+                
+                <div className="body-large space-y-4 leading-relaxed">
+                  {artwork.description && (
+                    <p>{artwork.description}</p>
+                  )}
+                  
+                  <div className="space-y-2">
+                    <p><strong>Collection:</strong> {artwork.collection}</p>
+                    <p><strong>Medium:</strong> {artwork.medium}</p>
+                    <p><strong>Dimensions:</strong> {artwork.dimensions}</p>
+                  </div>
+                </div>
+              </div>
               
-              {/* Right - Artwork Details */}
-              <div className="space-y-8">
-                <div className="text-center">
-                  <h1 className="text-3xl font-semibold text-dark-gray mb-4">
-                    "{artwork.title}"
-                  </h1>
-                  <div className="space-y-2 text-dark-gray">
-                    <p>{artwork.medium}</p>
-                    <p>{artwork.dimensions}</p>
-                  </div>
-                </div>
-                
-                {artwork.description && (
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium text-dark-gray">Description</h3>
-                    <p className="text-dark-gray leading-relaxed">
-                      {artwork.description}
-                    </p>
-                  </div>
-                )}
-                
-                <div className="pt-8">
-                  <Link 
-                    href={`/collection/${encodeURIComponent(artwork.collection)}`}
-                    className="text-dark-gray hover:text-accent-pink transition-colors"
-                  >
-                    <p>View More From</p>
-                    <p className="font-medium">{artwork.collection} Collection</p>
-                  </Link>
-                </div>
+              <div className="pt-6">
+                <Link href={`/collection/${artwork.collection}`} className="body-medium hover:opacity-80 transition-opacity">
+                  View More From {artwork.collection}
+                </Link>
               </div>
             </div>
           </div>
-        </main>
-      </div>
-    );
-  } catch (error) {
-    notFound();
-  }
+        </div>
+      </main>
+    </div>
+  );
 } 
