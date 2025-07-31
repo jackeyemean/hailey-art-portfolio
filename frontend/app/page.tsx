@@ -34,7 +34,7 @@ export default async function HomePage() {
       
       <main className="px-2 py-4">
         <div className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-40 lg:gap-48 items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-24 items-stretch">
             
             {/* Left Section - Artist's Pick */}
             <div className="flex flex-col space-y-4 h-full">
@@ -48,23 +48,21 @@ export default async function HomePage() {
                 </p>
               )}
               
-              <div className="flex-grow">
-                {artistPick ? (
-                  <Link href={`/artwork/${artistPick.id}`} className="block h-full">
-                    <div className="artist-pick-card h-full">
-                      <img 
-                        src={artistPick.imageUrl} 
-                        alt={artistPick.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </Link>
-                ) : (
-                  <div className="artist-pick-card flex items-center justify-center h-full">
-                    <p className="text-white text-lg">No artist pick set</p>
+              {artistPick ? (
+                <Link href={`/artwork/${artistPick.id}`} className="flex-grow">
+                  <div className="artist-pick-card h-full">
+                    <img 
+                      src={artistPick.imageUrl} 
+                      alt={artistPick.title}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                )}
-              </div>
+                </Link>
+              ) : (
+                <div className="artist-pick-card flex items-center justify-center flex-grow">
+                  <p className="text-white text-lg">No artist pick set</p>
+                </div>
+              )}
               
               <div className="space-y-1">
                 <p className="body-medium">View More From</p>
@@ -75,7 +73,7 @@ export default async function HomePage() {
             </div>
             
             {/* Right Section - Collections */}
-            <div className="flex flex-col space-y-4">
+            <div className="flex flex-col space-y-4 h-full">
               <h2 className="heading-medium">
                 Collections
               </h2>
@@ -84,7 +82,7 @@ export default async function HomePage() {
                 Personal projects, over the years.
               </p>
               
-              <div className="grid grid-rows-2 gap-6" style={{ 
+              <div className="grid grid-rows-2 gap-6 flex-grow home-collections" style={{ 
                 gridTemplateColumns: `repeat(${Math.max(2, Math.ceil(collections.length / 2))}, 200px)`
               }}>
                 {collections.length > 0 ? (

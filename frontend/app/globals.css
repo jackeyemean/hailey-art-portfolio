@@ -96,10 +96,16 @@ body {
 
 .artist-pick-card {
   background-color: #000000;
-  aspect-ratio: 405/500;
+  aspect-ratio: 405/400;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease;
+}
+
+/* Override aspect ratio for home page collections to allow stretching */
+.home-collections .collection-card {
+  aspect-ratio: unset;
+  height: 100%;
 }
 
 .artist-pick-card:hover {
