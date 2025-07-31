@@ -1,7 +1,8 @@
 import Header from '@/components/Header';
 import CollectionCard from '@/components/CollectionCard';
-import { fetchArtworks, fetchCollections } from '@/lib/api';
-import { Collection } from '@/types/artwork';
+import { fetchArtworks, fetchCollections, fetchArtistPick } from '@/lib/api';
+import { Collection, Artwork } from '@/types/artwork';
+import Link from 'next/link';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -10,9 +11,11 @@ export default async function HomePage() {
   // Force revalidation on every request
   const artworks = await fetchArtworks();
   const collectionNames = await fetchCollections();
+  const artistPick = await fetchArtistPick();
   
   console.log('Collection names:', collectionNames);
   console.log('Artworks:', artworks);
+  console.log('Artist pick:', artistPick);
   
   // Create collection objects with counts, filtering out empty names
   const collections: Collection[] = collectionNames
@@ -38,10 +41,27 @@ export default async function HomePage() {
               Artist's Pick
             </h2>
             
-            {/* Empty Artist's Pick for now */}
-            <div className="bg-black rounded-lg aspect-square flex items-center justify-center">
-              <p className="text-white text-lg">Coming Soon</p>
-            </div>
+            {artistPick ? (
+              <Link href={`/artwork/${artistPick.id}`}>
+                <div className="bg-black rounded-lg aspect-square overflow-hidden relative group cursor-pointer">
+                  <img 
+                    src={artistPick.imageUrl} 
+                    alt={artistPick.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-end">
+                    <div className="p-4 text-white">
+                      <h3 className="font-medium text-lg">{artistPick.title}</h3>
+                      <p className="text-sm opacity-90">{artistPick.collection}</p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <div className="bg-black rounded-lg aspect-square flex items-center justify-center">
+                <p className="text-white text-lg">No artist pick set</p>
+              </div>
+            )}
             
             <div className="text-sm text-dark-gray">
               <p>View More From</p>
