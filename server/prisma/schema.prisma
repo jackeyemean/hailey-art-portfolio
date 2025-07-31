@@ -16,4 +16,5 @@ model Artwork {
   medium      String                             // e.g. "Oil on canvas"
   dimensions  String                             // e.g. "30x40 in"
   createdAt   DateTime @default(now())           // Timestamp
+  isArtistPick Boolean @default(false)           // Artist's pick flag
 }
