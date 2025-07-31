@@ -18,6 +18,14 @@ router.post(
       const { buffer, originalname, mimetype } = req.file!;
       const imageUrl = await uploadToS3(buffer, originalname, mimetype);
 
+      // If this artwork is being set as artist's pick, unset any existing artist's pick
+      if (req.body.isArtistPick === 'true') {
+        await prisma.artwork.updateMany({
+          where: { isArtistPick: true },
+          data: { isArtistPick: false }
+        });
+      }
+
       const artwork = await prisma.artwork.create({
         data: {
           title:       req.body.title,
@@ -26,6 +34,7 @@ router.post(
           collection:  req.body.collection,
           medium:      req.body.medium,
           dimensions:  req.body.dimensions,
+          isArtistPick: req.body.isArtistPick === 'true',
         },
       });
 
@@ -46,6 +55,18 @@ router.get("/artworks", async (req, res, next) => {
         : {},                       // no filter otherwise
     });
     res.json(artworks);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Fetch artist's pick
+router.get("/artworks/artist-pick", async (req, res, next) => {
+  try {
+    const artistPick = await prisma.artwork.findFirst({
+      where: { isArtistPick: true },
+    });
+    res.json(artistPick);
   } catch (err) {
     next(err);
   }
@@ -78,6 +99,7 @@ router.put(
         collection,
         medium,
         dimensions,
+        isArtistPick,
       } = req.body;
 
       // fetch record
@@ -95,6 +117,17 @@ router.put(
         imageUrl = await uploadToS3(buffer, originalname, mimetype);
       }
 
+      // If this artwork is being set as artist's pick, unset any existing artist's pick
+      if (isArtistPick === 'true') {
+        await prisma.artwork.updateMany({
+          where: { 
+            isArtistPick: true,
+            id: { not: id } // Don't unset the current artwork
+          },
+          data: { isArtistPick: false }
+        });
+      }
+
       // update all fields
       const updated = await prisma.artwork.update({
         where: { id },
@@ -105,6 +138,7 @@ router.put(
           medium,
           dimensions,
           imageUrl,
+          isArtistPick: isArtistPick === 'true',
         },
       });
 
