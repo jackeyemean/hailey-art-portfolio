@@ -28,6 +28,20 @@ export async function fetchArtwork(id: string): Promise<Artwork> {
   return response.json();
 }
 
+export async function fetchArtistPick(): Promise<Artwork | null> {
+  const response = await fetch(`${API_BASE_URL}/artworks/artist-pick`, {
+    cache: 'no-store', // Disable caching
+    next: { revalidate: 0 } // Force revalidation
+  });
+  if (!response.ok) {
+    if (response.status === 404) {
+      return null; // No artist pick set
+    }
+    throw new Error(`Failed to fetch artist pick: ${response.status}`);
+  }
+  return response.json();
+}
+
 export async function fetchCollections(): Promise<string[]> {
   const artworks = await fetchArtworks();
   const collections = [...new Set(artworks.map(art => art.collection))];

@@ -7,6 +7,7 @@ export interface Artwork {
   medium: string;
   dimensions: string;
   createdAt: string;
+  isArtistPick: boolean;
 }
 
 export interface Collection {
