@@ -2,4 +2,5 @@
 export type RootStackParamList = {
   List: { adminKey: string };
   Form: { artworkId?: string; adminKey: string };
+  ProfileForm: { adminKey: string };
 };

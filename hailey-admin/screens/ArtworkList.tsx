@@ -29,6 +29,12 @@ export default function ArtworkList({ route, navigation }: Props) {
   const { adminKey } = route.params;
   const [data, setData] = useState<Artwork[]>([]);
 
+  // Calculate space needed for sticky button
+  const buttonHeight = 48; // Approximate height of the button
+  const buttonMargin = 16; // Bottom margin of the button
+  const extraPadding = 20; // Extra safety padding
+  const totalBottomSpace = insets.bottom + buttonHeight + buttonMargin + extraPadding;
+
   const fetchArtworks = async () => {
     try {
       const res = await fetch(`${API_URL}/artworks`, {
@@ -73,6 +79,17 @@ export default function ArtworkList({ route, navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Hailey Admin</Text>
+        <TouchableOpacity
+          style={styles.profileButton}
+          onPress={() => navigation.navigate('ProfileForm', { adminKey })}
+        >
+          <Text style={styles.profileButtonText}>Edit Profile</Text>
+        </TouchableOpacity>
+      </View>
+
       <FlatList
         data={data}
         keyExtractor={(item) => item.id}
@@ -104,8 +121,9 @@ export default function ArtworkList({ route, navigation }: Props) {
         )}
         contentContainerStyle={{
           padding: 16,
-          paddingBottom: insets.bottom + 80,
+          paddingBottom: totalBottomSpace, // Dynamic calculation based on button size
         }}
+        showsVerticalScrollIndicator={true}
       />
 
       <TouchableOpacity
@@ -114,6 +132,9 @@ export default function ArtworkList({ route, navigation }: Props) {
       >
         <Text style={styles.stickyButtonText}>Add New</Text>
       </TouchableOpacity>
+
+      {/* Background container for sticky button area */}
+      <View style={[styles.stickyButtonBackground, { bottom: insets.bottom }]} />
     </SafeAreaView>
   );
 }
@@ -123,6 +144,31 @@ const createListStyles = (isDark: boolean) =>
     container: {
       flex: 1,
       backgroundColor: isDark ? '#121212' : '#fff',
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: isDark ? '#333' : '#e0e0e0',
+    },
+    headerTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: isDark ? '#fff' : '#000',
+    },
+    profileButton: {
+      backgroundColor: isDark ? '#333' : '#f0f0f0',
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 6,
+    },
+    profileButtonText: {
+      color: isDark ? '#fff' : '#000',
+      fontSize: 14,
+      fontWeight: '500',
     },
     item: {
       flexDirection: 'row',
@@ -181,10 +227,21 @@ const createListStyles = (isDark: boolean) =>
       paddingVertical: 12,
       borderRadius: 8,
       alignItems: 'center',
+      zIndex: 1000, // Ensure button is above background
     },
     stickyButtonText: {
       color: isDark ? '#000' : '#fff',
       fontSize: 16,
       fontWeight: '600',
+    },
+    stickyButtonBackground: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      height: 80, // Height to cover button area
+      backgroundColor: isDark ? '#1a1a1a' : '#f8f8f8', // Different background color
+      borderTopWidth: 1,
+      borderTopColor: isDark ? '#333' : '#e0e0e0',
+      zIndex: 999, // Below the button but above content
     },
   });

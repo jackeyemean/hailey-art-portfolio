@@ -47,3 +47,16 @@ export async function fetchCollections(): Promise<string[]> {
   const collections = [...new Set(artworks.map(art => art.collection))];
   return collections.sort();
 } 
+
+export async function fetchProfile() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/profile`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch profile');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    return { imageUrl: null, description: null };
+  }
+} 

@@ -1,7 +1,14 @@
 import Link from 'next/link';
 import SocialMedia from '@/components/SocialMedia';
+import { fetchProfile } from '@/lib/api';
+import { Profile } from '@/types/artwork';
 
-export default function AboutPage() {
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+export default async function AboutPage() {
+  const profile: Profile = await fetchProfile();
+  
   return (
     <div className="min-h-screen bg-[#DFE2E4]">
       <div className="px-2 py-8">
@@ -23,17 +30,23 @@ export default function AboutPage() {
                 </h1>
                 
                 <div className="body-large space-y-6 leading-relaxed">
-                  <p>
-                    Founded from a lifelong desire to create, Hailey Atelier is a manifestation of my lived experience. My artistic process aims to memorialize emotion onto canvas. With each brushstroke, I preserve the nuance of movement and ambiance.
-                  </p>
-                  
-                  <p>
-                    I hope you find the same solace here, that I do in painting.
-                  </p>
-                  
-                  <p>
-                    Thank you for visiting Hailey Atelier.
-                  </p>
+                  {profile.description ? (
+                    <p>{profile.description}</p>
+                  ) : (
+                    <>
+                      <p>
+                        Founded from a lifelong desire to create, Hailey Atelier is a manifestation of my lived experience. My artistic process aims to memorialize emotion onto canvas. With each brushstroke, I preserve the nuance of movement and ambiance.
+                      </p>
+                      
+                      <p>
+                        I hope you find the same solace here, that I do in painting.
+                      </p>
+                      
+                      <p>
+                        Thank you for visiting Hailey Atelier.
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
               
@@ -50,10 +63,17 @@ export default function AboutPage() {
             {/* Right Section - Portrait and Social Media */}
             <div className="space-y-12">
               <div className="aspect-[315/400] bg-white rounded-lg overflow-hidden">
-                {/* Placeholder for portrait image */}
-                <div className="w-full h-full bg-gray-300 flex items-center justify-center">
-                  <p className="text-gray-600">Portrait Image</p>
-                </div>
+                {profile.imageUrl ? (
+                  <img 
+                    src={profile.imageUrl} 
+                    alt="Hailey Atelier Portrait"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                    <p className="text-gray-600">Portrait Image</p>
+                  </div>
+                )}
               </div>
               
               <div className="text-center space-y-6">

@@ -14,4 +14,11 @@ export interface Collection {
   name: string;
   count: number;
   thumbnail?: string;
+}
+
+export interface Profile {
+  id?: string;
+  imageUrl: string | null;
+  description: string | null;
+  updatedAt?: string;
 } 

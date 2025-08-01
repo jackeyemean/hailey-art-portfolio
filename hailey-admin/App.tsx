@@ -12,6 +12,7 @@ import {
 import { RootStackParamList } from './types';
 import ArtworkList from './screens/ArtworkList';
 import ArtworkForm from './screens/ArtworkForm';
+import ProfileForm from './screens/ProfileForm';
 import { ADMIN_KEY } from './constants';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -46,6 +47,7 @@ export default function App() {
              initialParams={{ adminKey: ADMIN_KEY }}
            />
            <Stack.Screen name="Form" component={ArtworkForm} />
+           <Stack.Screen name="ProfileForm" component={ProfileForm} />
          </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
