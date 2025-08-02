@@ -108,16 +108,17 @@ html {
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease;
-  width: 80%;
+  width: auto;
   height: auto;
   margin: 0;
 }
 
 /* Override aspect ratio for home page collections to allow stretching */
 .home-collections .collection-card {
-  aspect-ratio: unset;
+  aspect-ratio: 350/400;
   height: 100%;
-  width: 100%;
+  width: auto;
+  margin: 0;
 }
 
 .artist-pick-card:hover {

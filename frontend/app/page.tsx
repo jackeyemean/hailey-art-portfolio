@@ -13,6 +13,8 @@ export default async function HomePage() {
   const collectionNames = await fetchCollections();
   const artistPick = await fetchArtistPick();
   
+
+  
   console.log('Collection names:', collectionNames);
   console.log('Artworks:', artworks);
   console.log('Artist pick:', artistPick);
@@ -29,15 +31,15 @@ export default async function HomePage() {
   console.log('Collections:', collections);
 
   return (
-    <div className="min-h-screen bg-[#DFE2E4]">
+    <div className="bg-[#DFE2E4]">
       <Header />
       
              <main className="px-16 py-6">
         <div className="w-full">
                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 lg:gap-40">
             
-                         {/* Left Section - Artist's Pick */}
-             <div className="flex flex-col space-y-4 items-start h-full">
+                                     {/* Left Section - Artist's Pick */}
+            <div className="flex flex-col space-y-4 items-start">
               <h2 className="heading-medium">
                 Artist's Pick
               </h2>
@@ -48,9 +50,9 @@ export default async function HomePage() {
                 </p>
               )}
               
-                             {artistPick ? (
-                 <Link href={`/artwork/${artistPick.id}`} className="flex-grow">
-                   <div className="artist-pick-card h-full">
+                                           {artistPick ? (
+                <Link href={`/artwork/${artistPick.id}`}>
+                  <div className="artist-pick-card">
                     <img 
                       src={artistPick.imageUrl} 
                       alt={artistPick.title}
@@ -58,8 +60,8 @@ export default async function HomePage() {
                     />
                   </div>
                 </Link>
-                             ) : (
-                 <div className="artist-pick-card flex items-center justify-center flex-grow h-full">
+              ) : (
+                <div className="artist-pick-card flex items-center justify-center">
                   <p className="text-white text-lg">No artist pick set</p>
                 </div>
               )}
@@ -74,8 +76,8 @@ export default async function HomePage() {
               )}
             </div>
             
-                         {/* Right Section - Collections */}
-             <div className="flex flex-col space-y-4 ml-8 items-start h-full">
+                                     {/* Right Section - Collections */}
+            <div className="flex flex-col space-y-4 ml-8 items-start h-full">
                <h2 className="heading-medium">
                  Collections
                </h2>
@@ -84,23 +86,23 @@ export default async function HomePage() {
                  Personal projects, over the years.
                </p>
                
-                               <div className="grid grid-rows-2 gap-2 home-collections flex-grow" style={{ 
+                                               <div className="grid grid-rows-2 gap-2 home-collections flex-grow" style={{ 
                   gridTemplateColumns: `repeat(${Math.max(2, Math.ceil(collections.length / 2))}, 1fr)`,
                   gap: '8px',
                   alignContent: 'end'
                 }}>
-                {collections.length > 0 ? (
-                  collections.map((collection) => (
-                    <div key={collection.name} className="w-full">
-                      <CollectionCard collection={collection} />
+                  {collections.length > 0 ? (
+                    collections.map((collection) => (
+                      <div key={collection.name} className="w-full">
+                        <CollectionCard collection={collection} />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-8">
+                      <p className="text-[#000000]">No collections found</p>
                     </div>
-                  ))
-                ) : (
-                  <div className="col-span-full text-center py-8">
-                    <p className="text-[#000000]">No collections found</p>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
             </div>
           </div>
         </div>
