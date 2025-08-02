@@ -28,19 +28,19 @@ export default async function ArtworkPage({
 
   return (
     <div className="min-h-screen bg-[#DFE2E4]">
-              <div className="px-16 py-8">
+              <div className="px-8 lg:px-12 py-4">
         <Link href="/" className="back-link">
           Back to Home
         </Link>
       </div>
       
-              <main className="px-16 pb-12 pt-8">
+              <main className="px-8 lg:px-12 pb-8 pt-4">
         <div className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-40 lg:gap-48">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
             
             {/* Left Section - Artwork Image */}
-            <div className="space-y-8">
-              <div className="w-full h-[80vh]">
+            <div className="space-y-4">
+              <div className="w-full h-[70vh] lg:h-[75vh]">
                 <img 
                   src={artwork.imageUrl} 
                   alt={artwork.title}
@@ -50,13 +50,13 @@ export default async function ArtworkPage({
             </div>
             
             {/* Right Section - Artwork Details */}
-            <div className="space-y-8">
-              <div className="space-y-6">
+            <div className="space-y-6">
+              <div className="space-y-4">
                 <h1 className="heading-large leading-tight">
                   "{artwork.title}"
                 </h1>
                 
-                <div className="body-large space-y-4 leading-relaxed">
+                <div className="body-large space-y-3 leading-relaxed">
                   {artwork.description && (
                     <p>{artwork.description}</p>
                   )}
@@ -69,7 +69,7 @@ export default async function ArtworkPage({
                 </div>
               </div>
               
-              <div className="pt-6">
+              <div className="pt-4">
                 <Link href={`/collection/${artwork.collection}`} className="body-medium hover:opacity-80 transition-opacity">
                   View More From {artwork.collection}
                 </Link>
