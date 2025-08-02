@@ -26,6 +26,29 @@ export default async function HomePage() {
       const count = artworks.filter(art => art.collection === name).length;
       const thumbnail = artworks.find(art => art.collection === name)?.imageUrl;
       return { name, count, thumbnail };
+    })
+    .sort((a, b) => {
+      // Check if both are numbers
+      const aIsNumber = !isNaN(Number(a.name));
+      const bIsNumber = !isNaN(Number(b.name));
+      
+      // If both are numbers, sort numerically in descending order
+      if (aIsNumber && bIsNumber) {
+        return Number(b.name) - Number(a.name);
+      }
+      
+      // If only a is a number, a comes first
+      if (aIsNumber && !bIsNumber) {
+        return -1;
+      }
+      
+      // If only b is a number, b comes first
+      if (!aIsNumber && bIsNumber) {
+        return 1;
+      }
+      
+      // If both are text, sort alphabetically in descending order
+      return b.name.localeCompare(a.name);
     });
   
   console.log('Collections:', collections);
