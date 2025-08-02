@@ -104,7 +104,7 @@ html {
 
 .artist-pick-card {
   background-color: #000000;
-  aspect-ratio: 405/400;
+  aspect-ratio: 400/295;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease;
@@ -113,9 +113,8 @@ html {
   margin: 0;
 }
 
-/* Override aspect ratio for home page collections to allow stretching */
 .home-collections .collection-card {
-  aspect-ratio: 350/400;
+  aspect-ratio: 400/375;
   height: 100%;
   width: auto;
   margin: 0;
