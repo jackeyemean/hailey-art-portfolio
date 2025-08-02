@@ -11,13 +11,13 @@ export default async function AboutPage() {
   
   return (
     <div className="min-h-screen bg-[#DFE2E4]">
-      <div className="px-2 py-8">
+              <div className="px-16 py-8">
         <Link href="/" className="back-link">
           Back
         </Link>
       </div>
       
-      <main className="px-2 pb-12 pt-8">
+              <main className="px-16 pb-12 pt-8">
         <div className="w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-40 lg:gap-48">
             

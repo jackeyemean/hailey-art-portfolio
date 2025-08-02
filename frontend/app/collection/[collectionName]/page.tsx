@@ -33,13 +33,15 @@ export default async function CollectionPage({
 
   return (
     <div className="min-h-screen bg-[#DFE2E4]">
-      <div className="px-2 py-8">
-        <Link href="/" className="back-link">
-          Back to Home
-        </Link>
+      <div className="px-16 py-8">
+        <div className="w-full max-w-6xl mx-auto">
+          <Link href="/" className="back-link">
+            Back to Home
+          </Link>
+        </div>
       </div>
       
-      <main className="px-2 pb-12 pt-8">
+      <main className="px-16 pb-12 pt-8">
         <div className="w-full">
           <div className="text-center mb-6">
             <h1 className="heading-medium">

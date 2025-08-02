@@ -32,12 +32,12 @@ export default async function HomePage() {
     <div className="min-h-screen bg-[#DFE2E4]">
       <Header />
       
-      <main className="px-2 py-4">
+             <main className="px-16 py-6">
         <div className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-24 items-stretch">
+                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 lg:gap-40">
             
-            {/* Left Section - Artist's Pick */}
-            <div className="flex flex-col space-y-4 h-full">
+                         {/* Left Section - Artist's Pick */}
+             <div className="flex flex-col space-y-4 items-start h-full">
               <h2 className="heading-medium">
                 Artist's Pick
               </h2>
@@ -48,9 +48,9 @@ export default async function HomePage() {
                 </p>
               )}
               
-              {artistPick ? (
-                <Link href={`/artwork/${artistPick.id}`} className="flex-grow">
-                  <div className="artist-pick-card h-full">
+                             {artistPick ? (
+                 <Link href={`/artwork/${artistPick.id}`} className="flex-grow">
+                   <div className="artist-pick-card h-full">
                     <img 
                       src={artistPick.imageUrl} 
                       alt={artistPick.title}
@@ -58,8 +58,8 @@ export default async function HomePage() {
                     />
                   </div>
                 </Link>
-              ) : (
-                <div className="artist-pick-card flex items-center justify-center flex-grow">
+                             ) : (
+                 <div className="artist-pick-card flex items-center justify-center flex-grow h-full">
                   <p className="text-white text-lg">No artist pick set</p>
                 </div>
               )}
@@ -74,19 +74,21 @@ export default async function HomePage() {
               )}
             </div>
             
-            {/* Right Section - Collections */}
-            <div className="flex flex-col space-y-4 h-full">
-              <h2 className="heading-medium">
-                Collections
-              </h2>
-              
-              <p className="body-medium">
-                Personal projects, over the years.
-              </p>
-              
-              <div className="grid grid-rows-2 gap-6 flex-grow home-collections" style={{ 
-                gridTemplateColumns: `repeat(${Math.max(2, Math.ceil(collections.length / 2))}, 200px)`
-              }}>
+                         {/* Right Section - Collections */}
+             <div className="flex flex-col space-y-4 ml-8 items-start h-full">
+               <h2 className="heading-medium">
+                 Collections
+               </h2>
+               
+               <p className="body-medium">
+                 Personal projects, over the years.
+               </p>
+               
+                               <div className="grid grid-rows-2 gap-2 home-collections flex-grow" style={{ 
+                  gridTemplateColumns: `repeat(${Math.max(2, Math.ceil(collections.length / 2))}, 1fr)`,
+                  gap: '8px',
+                  alignContent: 'end'
+                }}>
                 {collections.length > 0 ? (
                   collections.map((collection) => (
                     <div key={collection.name} className="w-full">
