@@ -67,10 +67,8 @@ html {
   position: relative;
   overflow: hidden;
   cursor: pointer;
-}
-
-.collection-card:hover {
-  transform: scale(1.02);
+  transform-origin: center;
+  will-change: transform;
 }
 
 .collection-card img {

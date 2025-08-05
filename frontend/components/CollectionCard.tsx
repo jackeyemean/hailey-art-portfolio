@@ -16,8 +16,8 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
   const isSketch = collection.name.toLowerCase().includes('sketch');
 
   return (
-    <Link href={`/collection/${encodeURIComponent(collection.name)}`}>
-      <div className="collection-card">
+    <Link href={`/collection/${encodeURIComponent(collection.name)}`} className="group">
+      <div className="collection-card group-hover:scale-105 transition-transform duration-300 ease-out">
         {collection.thumbnail ? (
           <img 
             src={collection.thumbnail} 

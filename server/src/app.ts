@@ -9,6 +9,7 @@ app.use(express.json());
 app.use("/api", artworkRouter);
 app.use("/api/profile", profileRouter);
 
-app.listen(4000, '0.0.0.0', () => {
-  console.log('Listening on 0.0.0.0:4000');
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Listening on 0.0.0.0:${PORT}`);
 });
