@@ -8,8 +8,7 @@ export async function fetchArtworks(collection?: string): Promise<Artwork[]> {
     : `${API_BASE_URL}/artworks`;
     
   const response = await fetch(url, {
-    cache: 'no-store', // Disable caching
-    next: { revalidate: 0 } // Force revalidation
+    cache: 'no-store' // Disable caching
   });
   if (!response.ok) {
     throw new Error(`Failed to fetch artworks: ${response.status}`);
@@ -19,8 +18,7 @@ export async function fetchArtworks(collection?: string): Promise<Artwork[]> {
 
 export async function fetchArtwork(id: string): Promise<Artwork> {
   const response = await fetch(`${API_BASE_URL}/artworks/${id}`, {
-    cache: 'no-store', // Disable caching
-    next: { revalidate: 0 } // Force revalidation
+    cache: 'no-store' // Disable caching
   });
   if (!response.ok) {
     throw new Error(`Failed to fetch artwork: ${response.status}`);
@@ -30,8 +28,7 @@ export async function fetchArtwork(id: string): Promise<Artwork> {
 
 export async function fetchArtistPick(): Promise<Artwork | null> {
   const response = await fetch(`${API_BASE_URL}/artworks/artist-pick`, {
-    cache: 'no-store', // Disable caching
-    next: { revalidate: 0 } // Force revalidation
+    cache: 'no-store' // Disable caching
   });
   if (!response.ok) {
     if (response.status === 404) {
