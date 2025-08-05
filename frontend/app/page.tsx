@@ -57,7 +57,7 @@ export default async function HomePage() {
     <div className="bg-[#DFE2E4]">
       <Header />
       
-             <main className="px-16 py-3">
+                           <main className="px-4 lg:px-16 py-3">
         <div className="w-full">
                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-40">
             
