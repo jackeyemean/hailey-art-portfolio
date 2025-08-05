@@ -4,6 +4,11 @@ import {
   S3_BUCKET_NAME as ENV_S3_BUCKET_NAME,
 } from '@env'
 
+console.log('Environment variables loaded:');
+console.log('ENV_API_URL:', ENV_API_URL);
+console.log('ENV_ADMIN_KEY:', ENV_ADMIN_KEY);
+console.log('ENV_S3_BUCKET_NAME:', ENV_S3_BUCKET_NAME);
+
 export const API_URL    = ENV_API_URL
 export const ADMIN_KEY  = ENV_ADMIN_KEY    ?? ''
 export const BUCKET_URL = `https://${ENV_S3_BUCKET_NAME}.s3.amazonaws.com`

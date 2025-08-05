@@ -34,7 +34,10 @@ export default function ProfileForm({ route, navigation }: Props) {
 
   const fetchProfile = async () => {
     try {
+      console.log('Attempting to fetch profile from:', `${API_URL}/profile`);
+      console.log('Full API URL:', API_URL);
       const response = await fetch(`${API_URL}/profile`);
+      console.log('Profile response status:', response.status);
       const profile = await response.json();
       
       setDescription(profile.description || '');
@@ -47,6 +50,7 @@ export default function ProfileForm({ route, navigation }: Props) {
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching profile:', error);
+      console.error('Profile error details:', JSON.stringify(error, null, 2));
       Alert.alert('Error', 'Could not load profile data.');
       setIsLoading(false);
     }

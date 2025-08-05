@@ -37,13 +37,26 @@ export default function ArtworkList({ route, navigation }: Props) {
 
   const fetchArtworks = async () => {
     try {
+      console.log('Attempting to fetch from:', `${API_URL}/artworks`);
+      console.log('Full API URL:', API_URL);
+      
+      // Test if server is reachable
+      try {
+        const testResponse = await fetch(`${API_URL.replace('/api', '')}/health`);
+        console.log('Server health check status:', testResponse.status);
+      } catch (testErr) {
+        console.log('Server health check failed:', testErr);
+      }
+      
       const res = await fetch(`${API_URL}/artworks`, {
         headers: { 'x-admin-key': adminKey },
       });
+      console.log('Response status:', res.status);
       if (!res.ok) throw new Error(`Status ${res.status}`);
       setData(await res.json());
     } catch (err) {
       console.error('Fetch artworks failed:', err);
+      console.error('Error details:', JSON.stringify(err, null, 2));
     }
   };
 
