@@ -59,7 +59,7 @@ export default async function HomePage() {
       
              <main className="px-16 py-3">
         <div className="w-full">
-                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 lg:gap-40">
+                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-40">
             
                                      {/* Left Section - Artist's Pick */}
             <div className="flex flex-col justify-between items-start h-full">
@@ -102,7 +102,7 @@ export default async function HomePage() {
             </div>
             
                                      {/* Right Section - Collections */}
-                                                 <div className="flex flex-col items-start h-full ml-8">
+                                                 <div className="flex flex-col items-start h-full lg:ml-8">
                 <div className="flex flex-col space-y-2">
                   <h2 className="heading-medium">
                     Collections
