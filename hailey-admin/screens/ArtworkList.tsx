@@ -1,16 +1,16 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FlatList,
-  View,
-  Text,
   TouchableOpacity,
+  Text,
+  View,
   StyleSheet,
   Alert,
   useColorScheme,
+  Modal,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../types';
 import { API_URL } from '../constants';
 
@@ -22,12 +22,123 @@ type Artwork = {
 };
 type Props = NativeStackScreenProps<RootStackParamList, 'List'>;
 
+// Custom confirmation modal for web compatibility
+const ConfirmationModal = ({ 
+  visible, 
+  title, 
+  message, 
+  onConfirm, 
+  onCancel, 
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  isDestructive = false 
+}: {
+  visible: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  confirmText?: string;
+  cancelText?: string;
+  isDestructive?: boolean;
+}) => {
+  const isDark = useColorScheme() === 'dark';
+  
+  const modalStyles = StyleSheet.create({
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContent: {
+      margin: 20,
+      borderRadius: 12,
+      padding: 24,
+      minWidth: 300,
+      maxWidth: 400,
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 12,
+    },
+    modalMessage: {
+      fontSize: 16,
+      marginBottom: 24,
+      lineHeight: 22,
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      gap: 12,
+    },
+    modalButton: {
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      minWidth: 60,
+      alignItems: 'center',
+    },
+    modalButtonSecondary: {
+      backgroundColor: 'transparent',
+    },
+    modalButtonPrimary: {
+      backgroundColor: '#007AFF',
+    },
+    modalButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#fff',
+    },
+  });
+  
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+    >
+      <View style={modalStyles.modalOverlay}>
+        <View style={[modalStyles.modalContent, { backgroundColor: isDark ? '#1E1E1E' : '#fff' }]}>
+          <Text style={[modalStyles.modalTitle, { color: isDark ? '#fff' : '#000' }]}>{title}</Text>
+          <Text style={[modalStyles.modalMessage, { color: isDark ? '#ccc' : '#666' }]}>{message}</Text>
+          <View style={modalStyles.modalButtons}>
+            <TouchableOpacity 
+              style={[modalStyles.modalButton, modalStyles.modalButtonSecondary]} 
+              onPress={onCancel}
+            >
+              <Text style={[modalStyles.modalButtonText, { color: isDark ? '#0A84FF' : '#007AFF' }]}>
+                {cancelText}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[
+                modalStyles.modalButton, 
+                modalStyles.modalButtonPrimary,
+                isDestructive && { backgroundColor: '#FF3B30' }
+              ]} 
+              onPress={onConfirm}
+            >
+              <Text style={modalStyles.modalButtonText}>{confirmText}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 export default function ArtworkList({ route, navigation }: Props) {
-  const scheme = useColorScheme();
-  const isDark = scheme === 'dark';
+  const isDark = useColorScheme() === 'dark';
   const insets = useSafeAreaInsets();
   const { adminKey } = route.params;
+
   const [data, setData] = useState<Artwork[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   // Calculate space needed for sticky button
   const buttonHeight = 48; // Approximate height of the button
@@ -35,32 +146,33 @@ export default function ArtworkList({ route, navigation }: Props) {
   const extraPadding = 20; // Extra safety padding
   const totalBottomSpace = insets.bottom + buttonHeight + buttonMargin + extraPadding;
 
+  useEffect(() => {
+    fetchArtworks();
+  }, []);
+
+  // Refresh when screen comes into focus
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchArtworks();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   const fetchArtworks = async () => {
     try {
-      console.log('Attempting to fetch from:', `${API_URL}/artworks`);
+      console.log('Attempting to fetch artworks from:', `${API_URL}/artworks`);
       console.log('Full API URL:', API_URL);
-      
-      // Test if server is reachable
-      try {
-        const testResponse = await fetch(`${API_URL.replace('/api', '')}/health`);
-        console.log('Server health check status:', testResponse.status);
-      } catch (testErr) {
-        console.log('Server health check failed:', testErr);
-      }
-      
-      const res = await fetch(`${API_URL}/artworks`, {
-        headers: { 'x-admin-key': adminKey },
-      });
-      console.log('Response status:', res.status);
-      if (!res.ok) throw new Error(`Status ${res.status}`);
-      setData(await res.json());
-    } catch (err) {
-      console.error('Fetch artworks failed:', err);
-      console.error('Error details:', JSON.stringify(err, null, 2));
+      const response = await fetch(`${API_URL}/artworks`);
+      console.log('Artworks response status:', response.status);
+      const artworks = await response.json();
+      setData(artworks);
+    } catch (error) {
+      console.error('Fetch artworks failed:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      setErrorMessage('Could not load artworks.');
+      setShowErrorModal(true);
     }
   };
-
-  useFocusEffect(useCallback(() => { fetchArtworks(); }, [adminKey]));
 
   const handleDelete = async (id: string) => {
     try {
@@ -75,14 +187,22 @@ export default function ArtworkList({ route, navigation }: Props) {
   };
 
   const confirmDelete = (id: string) => {
-    Alert.alert(
-      'Confirm Delete',
-      'Are you sure you want to delete this artwork?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => handleDelete(id) },
-      ]
-    );
+    setPendingDeleteId(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (pendingDeleteId) {
+      handleDelete(pendingDeleteId);
+      setPendingDeleteId(null);
+    }
+    setShowDeleteModal(false);
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setShowErrorModal(false);
+    setPendingDeleteId(null);
   };
 
   const handleEdit = (id: string) =>
@@ -148,6 +268,27 @@ export default function ArtworkList({ route, navigation }: Props) {
 
       {/* Background container for sticky button area */}
       <View style={[styles.stickyButtonBackground, { bottom: insets.bottom }]} />
+
+      <ConfirmationModal
+        visible={showDeleteModal}
+        title="Confirm Delete"
+        message="Are you sure you want to delete this artwork?"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        confirmText="Delete"
+        cancelText="Cancel"
+        isDestructive={true}
+      />
+
+      <ConfirmationModal
+        visible={showErrorModal}
+        title="Error"
+        message={errorMessage}
+        onConfirm={handleDeleteCancel}
+        onCancel={handleDeleteCancel}
+        confirmText="OK"
+        cancelText="Cancel"
+      />
     </SafeAreaView>
   );
 }

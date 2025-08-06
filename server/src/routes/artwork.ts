@@ -15,8 +15,16 @@ router.post(
   upload.single("image"),
   async (req, res, next) => {
     try {
-      const { buffer, originalname, mimetype } = req.file!;
-      const imageUrl = await uploadToS3(buffer, originalname, mimetype);
+      let imageUrl = '';
+      
+      // Only process image if one was uploaded
+      if (req.file) {
+        const { buffer, originalname, mimetype } = req.file;
+        imageUrl = await uploadToS3(buffer, originalname, mimetype);
+      } else {
+        // Return error if no image was provided
+        return res.status(400).json({ error: 'Image is required' });
+      }
 
       // If this artwork is being set as artist's pick, unset any existing artist's pick
       if (req.body.isArtistPick === 'true') {

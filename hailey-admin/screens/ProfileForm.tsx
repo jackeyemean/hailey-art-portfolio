@@ -10,6 +10,8 @@ import {
   Alert,
   Text,
   useColorScheme,
+  Modal,
+  Platform,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -19,6 +21,113 @@ import { API_URL, BUCKET_URL } from '../constants';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProfileForm'>;
 
+// Custom confirmation modal for web compatibility
+const ConfirmationModal = ({ 
+  visible, 
+  title, 
+  message, 
+  onConfirm, 
+  onCancel, 
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  isDestructive = false 
+}: {
+  visible: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  confirmText?: string;
+  cancelText?: string;
+  isDestructive?: boolean;
+}) => {
+  const isDark = useColorScheme() === 'dark';
+  
+  const modalStyles = StyleSheet.create({
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContent: {
+      margin: 20,
+      borderRadius: 12,
+      padding: 24,
+      minWidth: 300,
+      maxWidth: 400,
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 12,
+    },
+    modalMessage: {
+      fontSize: 16,
+      marginBottom: 24,
+      lineHeight: 22,
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      gap: 12,
+    },
+    modalButton: {
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      minWidth: 60,
+      alignItems: 'center',
+    },
+    modalButtonSecondary: {
+      backgroundColor: 'transparent',
+    },
+    modalButtonPrimary: {
+      backgroundColor: '#007AFF',
+    },
+    modalButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#fff',
+    },
+  });
+  
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+    >
+      <View style={modalStyles.modalOverlay}>
+        <View style={[modalStyles.modalContent, { backgroundColor: isDark ? '#1E1E1E' : '#fff' }]}>
+          <Text style={[modalStyles.modalTitle, { color: isDark ? '#fff' : '#000' }]}>{title}</Text>
+          <Text style={[modalStyles.modalMessage, { color: isDark ? '#ccc' : '#666' }]}>{message}</Text>
+          <View style={modalStyles.modalButtons}>
+            <TouchableOpacity 
+              style={[modalStyles.modalButton, modalStyles.modalButtonSecondary]} 
+              onPress={onCancel}
+            >
+              <Text style={[modalStyles.modalButtonText, { color: isDark ? '#0A84FF' : '#007AFF' }]}>
+                {cancelText}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[
+                modalStyles.modalButton, 
+                modalStyles.modalButtonPrimary,
+                isDestructive && { backgroundColor: '#FF3B30' }
+              ]} 
+              onPress={onConfirm}
+            >
+              <Text style={modalStyles.modalButtonText}>{confirmText}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 export default function ProfileForm({ route, navigation }: Props) {
   const isDark = useColorScheme() === 'dark';
   const { adminKey } = route.params;
@@ -26,7 +135,15 @@ export default function ProfileForm({ route, navigation }: Props) {
   const [description, setDescription] = useState('');
   const [uri, setUri] = useState<string | null>(null);
   const [isNewImage, setIsNewImage] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showDiscardModal, setShowDiscardModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
   useEffect(() => {
     fetchProfile();
@@ -51,7 +168,8 @@ export default function ProfileForm({ route, navigation }: Props) {
     } catch (error) {
       console.error('Error fetching profile:', error);
       console.error('Profile error details:', JSON.stringify(error, null, 2));
-      Alert.alert('Error', 'Could not load profile data.');
+      setErrorMessage('Could not load profile data.');
+      setShowErrorModal(true);
       setIsLoading(false);
     }
   };
@@ -62,19 +180,38 @@ export default function ProfileForm({ route, navigation }: Props) {
       quality: 0.7,
     });
     if (!res.canceled && res.assets?.length) {
-      setUri(res.assets[0].uri);
+      const asset = res.assets[0];
+      setUri(asset.uri);
       setIsNewImage(true);
+      
+      // For web, convert the asset to a File object
+      if (Platform.OS === 'web' && asset.uri) {
+        try {
+          const response = await fetch(asset.uri);
+          const blob = await response.blob();
+          const file = new File([blob], asset.fileName || 'image.jpg', { type: asset.mimeType || 'image/jpeg' });
+          setSelectedFile(file);
+        } catch (error) {
+          console.error('Error converting image to file:', error);
+        }
+      }
     }
   };
 
   const submitForm = async () => {
     const form = new FormData();
     if (isNewImage && uri) {
-      form.append('image', {
-        uri,
-        name: uri.split('/').pop()!,
-        type: 'image/jpeg',
-      } as any);
+      if (Platform.OS === 'web' && selectedFile) {
+        // For web, use the File object
+        form.append('image', selectedFile);
+      } else {
+        // For mobile, use the uri object
+        form.append('image', {
+          uri,
+          name: uri.split('/').pop()!,
+          type: 'image/jpeg',
+        } as any);
+      }
     }
     form.append('description', description.trim());
 
@@ -87,36 +224,45 @@ export default function ProfileForm({ route, navigation }: Props) {
       
       if (!res.ok) {
         const text = await res.text();
-        return Alert.alert('Save failed', text || `Status ${res.status}`);
+        setErrorMessage(text || `Status ${res.status}`);
+        setShowErrorModal(true);
+        return;
       }
       
-      Alert.alert('Success', 'Profile updated successfully!');
+      setSuccessMessage('Profile updated successfully!');
+      setShowSuccessModal(true);
       navigation.goBack();
     } catch (error) {
-      Alert.alert('Error', 'Unable to save profile.');
+      setErrorMessage('Unable to save profile.');
+      setShowErrorModal(true);
     }
   };
 
   const handleSubmit = () => {
-    Alert.alert(
-      'Confirm Update',
-      'Are you sure you want to update your profile?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Update', onPress: submitForm },
-      ]
-    );
+    setPendingAction(() => submitForm);
+    setShowConfirmModal(true);
   };
 
   const handleBack = () => {
-    Alert.alert(
-      'Discard changes?',
-      'Any unsaved changes will be lost.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Discard', style: 'destructive', onPress: () => navigation.goBack() },
-      ]
-    );
+    setPendingAction(() => () => navigation.goBack());
+    setShowDiscardModal(true);
+  };
+
+  const handleConfirm = () => {
+    setShowConfirmModal(false);
+    setShowDiscardModal(false);
+    if (pendingAction) {
+      pendingAction();
+      setPendingAction(null);
+    }
+  };
+
+  const handleCancel = () => {
+    setShowConfirmModal(false);
+    setShowDiscardModal(false);
+    setShowErrorModal(false);
+    setShowSuccessModal(false);
+    setPendingAction(null);
   };
 
   const styles = createStyles(isDark);
@@ -194,6 +340,51 @@ export default function ProfileForm({ route, navigation }: Props) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        visible={showConfirmModal}
+        title="Confirm Update"
+        message="Are you sure you want to update your profile?"
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+        confirmText="Update"
+        cancelText="Cancel"
+      />
+
+      {/* Discard Modal */}
+      <ConfirmationModal
+        visible={showDiscardModal}
+        title="Discard changes?"
+        message="Any unsaved changes will be lost."
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+        confirmText="Discard"
+        cancelText="Cancel"
+        isDestructive={true}
+      />
+
+      {/* Error Modal */}
+      <ConfirmationModal
+        visible={showErrorModal}
+        title="Error"
+        message={errorMessage}
+        onConfirm={handleCancel}
+        onCancel={handleCancel}
+        confirmText="OK"
+        cancelText="Cancel"
+      />
+
+      {/* Success Modal */}
+      <ConfirmationModal
+        visible={showSuccessModal}
+        title="Success"
+        message={successMessage}
+        onConfirm={handleCancel}
+        onCancel={handleCancel}
+        confirmText="OK"
+        cancelText="Cancel"
+      />
     </SafeAreaView>
   );
 }

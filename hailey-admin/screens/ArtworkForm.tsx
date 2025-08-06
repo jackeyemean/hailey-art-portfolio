@@ -11,6 +11,8 @@ import {
   Text,
   useColorScheme,
   Switch,
+  Modal,
+  Platform,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -19,6 +21,113 @@ import { RootStackParamList } from '../types';
 import { API_URL, BUCKET_URL } from '../constants';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Form'>;
+
+// Custom confirmation modal for web compatibility
+const ConfirmationModal = ({ 
+  visible, 
+  title, 
+  message, 
+  onConfirm, 
+  onCancel, 
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  isDestructive = false 
+}: {
+  visible: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  confirmText?: string;
+  cancelText?: string;
+  isDestructive?: boolean;
+}) => {
+  const isDark = useColorScheme() === 'dark';
+  
+  const modalStyles = StyleSheet.create({
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContent: {
+      margin: 20,
+      borderRadius: 12,
+      padding: 24,
+      minWidth: 300,
+      maxWidth: 400,
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 12,
+    },
+    modalMessage: {
+      fontSize: 16,
+      marginBottom: 24,
+      lineHeight: 22,
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      gap: 12,
+    },
+    modalButton: {
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      minWidth: 60,
+      alignItems: 'center',
+    },
+    modalButtonSecondary: {
+      backgroundColor: 'transparent',
+    },
+    modalButtonPrimary: {
+      backgroundColor: '#007AFF',
+    },
+    modalButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#fff',
+    },
+  });
+  
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+    >
+      <View style={modalStyles.modalOverlay}>
+        <View style={[modalStyles.modalContent, { backgroundColor: isDark ? '#1E1E1E' : '#fff' }]}>
+          <Text style={[modalStyles.modalTitle, { color: isDark ? '#fff' : '#000' }]}>{title}</Text>
+          <Text style={[modalStyles.modalMessage, { color: isDark ? '#ccc' : '#666' }]}>{message}</Text>
+          <View style={modalStyles.modalButtons}>
+            <TouchableOpacity 
+              style={[modalStyles.modalButton, modalStyles.modalButtonSecondary]} 
+              onPress={onCancel}
+            >
+              <Text style={[modalStyles.modalButtonText, { color: isDark ? '#0A84FF' : '#007AFF' }]}>
+                {cancelText}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[
+                modalStyles.modalButton, 
+                modalStyles.modalButtonPrimary,
+                isDestructive && { backgroundColor: '#FF3B30' }
+              ]} 
+              onPress={onConfirm}
+            >
+              <Text style={modalStyles.modalButtonText}>{confirmText}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 export default function ArtworkForm({ route, navigation }: Props) {
   const isDark = useColorScheme() === 'dark';
@@ -32,6 +141,12 @@ export default function ArtworkForm({ route, navigation }: Props) {
   const [isArtistPick, setIsArtistPick] = useState(false);
   const [uri, setUri]                 = useState<string | null>(null);
   const [isNewImage, setIsNewImage]   = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showDiscardModal, setShowDiscardModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
   useEffect(() => {
     if (!artworkId) return;
@@ -54,7 +169,8 @@ export default function ArtworkForm({ route, navigation }: Props) {
       })
       .catch(err => {
         console.error(err);
-        Alert.alert('Error', 'Could not load artwork data.');
+        setErrorMessage('Could not load artwork data.');
+        setShowErrorModal(true);
       });
   }, [artworkId]);
 
@@ -64,19 +180,38 @@ export default function ArtworkForm({ route, navigation }: Props) {
       quality: 0.7,
     });
     if (!res.canceled && res.assets?.length) {
-      setUri(res.assets[0].uri);
+      const asset = res.assets[0];
+      setUri(asset.uri);
       setIsNewImage(true);
+      
+      // For web, convert the asset to a File object
+      if (Platform.OS === 'web' && asset.uri) {
+        try {
+          const response = await fetch(asset.uri);
+          const blob = await response.blob();
+          const file = new File([blob], asset.fileName || 'image.jpg', { type: asset.mimeType || 'image/jpeg' });
+          setSelectedFile(file);
+        } catch (error) {
+          console.error('Error converting image to file:', error);
+        }
+      }
     }
   };
 
   const submitForm = async () => {
     const form = new FormData();
     if (isNewImage && uri) {
-      form.append('image', {
-        uri,
-        name: uri.split('/').pop()!,
-        type: 'image/jpeg',
-      } as any);
+      if (Platform.OS === 'web' && selectedFile) {
+        // For web, use the File object
+        form.append('image', selectedFile);
+      } else {
+        // For mobile, use the uri object
+        form.append('image', {
+          uri,
+          name: uri.split('/').pop()!,
+          type: 'image/jpeg',
+        } as any);
+      }
     }
     form.append('title', title.trim());
     form.append('description', description.trim());
@@ -96,40 +231,55 @@ export default function ArtworkForm({ route, navigation }: Props) {
       });
       if (!res.ok) {
         const text = await res.text();
-        return Alert.alert('Save failed', text || `Status ${res.status}`);
+        setErrorMessage(text || `Status ${res.status}`);
+        setShowErrorModal(true);
+        return;
       }
       navigation.goBack();
     } catch {
-      Alert.alert('Error', 'Unable to save artwork.');
+      setErrorMessage('Unable to save artwork.');
+      setShowErrorModal(true);
     }
   };
 
   const handleSubmit = () => {
-    if (!title.trim()) return Alert.alert('Please enter a title.');
-    if (!uri)           return Alert.alert('Please select an image.');
+    if (!title.trim()) {
+      setErrorMessage('Please enter a title.');
+      setShowErrorModal(true);
+      return;
+    }
+    if (!uri) {
+      setErrorMessage('Please select an image.');
+      setShowErrorModal(true);
+      return;
+    }
     if (artworkId) {
-      Alert.alert(
-        'Confirm Update',
-        'Are you sure you want to update this record?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Update', onPress: submitForm },
-        ]
-      );
+      setPendingAction(() => submitForm);
+      setShowConfirmModal(true);
     } else {
       submitForm();
     }
   };
 
   const handleBack = () => {
-    Alert.alert(
-      'Discard changes?',
-      'Any unsaved changes will be lost.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Discard', style: 'destructive', onPress: () => navigation.goBack() },
-      ]
-    );
+    setPendingAction(() => () => navigation.goBack());
+    setShowDiscardModal(true);
+  };
+
+  const handleConfirm = () => {
+    setShowConfirmModal(false);
+    setShowDiscardModal(false);
+    if (pendingAction) {
+      pendingAction();
+      setPendingAction(null);
+    }
+  };
+
+  const handleCancel = () => {
+    setShowConfirmModal(false);
+    setShowDiscardModal(false);
+    setShowErrorModal(false);
+    setPendingAction(null);
   };
 
   const styles = createStyles(isDark);
@@ -248,6 +398,34 @@ export default function ArtworkForm({ route, navigation }: Props) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <ConfirmationModal
+        visible={showConfirmModal}
+        title="Confirm Update"
+        message="Are you sure you want to update this record?"
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+        confirmText="Update"
+        cancelText="Cancel"
+      />
+      <ConfirmationModal
+        visible={showDiscardModal}
+        title="Discard changes?"
+        message="Any unsaved changes will be lost."
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+        confirmText="Discard"
+        cancelText="Cancel"
+        isDestructive
+      />
+      <ConfirmationModal
+        visible={showErrorModal}
+        title="Error"
+        message={errorMessage}
+        onConfirm={handleCancel}
+        onCancel={handleCancel}
+        confirmText="OK"
+        cancelText="Cancel"
+      />
     </SafeAreaView>
   );
 }
