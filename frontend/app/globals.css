@@ -254,4 +254,29 @@ html {
 
 .collection-link:hover .collection-title {
   text-decoration: underline;
+}
+
+/* Consistent margin system */
+.page-margins {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .page-margins {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+}
+
+.page-margins-wide {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .page-margins-wide {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
 } 

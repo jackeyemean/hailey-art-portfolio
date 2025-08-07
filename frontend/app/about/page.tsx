@@ -11,13 +11,13 @@ export default async function AboutPage() {
   
   return (
     <div className="bg-[#F7F5F3]">
-      <div className="px-4 lg:px-16 py-4 lg:py-6">
+      <div className="page-margins py-6">
         <Link href="/" className="back-link">
           Back
         </Link>
       </div>
       
-      <main className="px-4 lg:px-16 py-8">
+      <main className="page-margins py-3">
         <div className="w-full">
                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 2xl:gap-20 lg:pl-8 xl:pl-12 2xl:pl-16 lg:pr-8 xl:pr-12 2xl:pr-16">
             

@@ -28,13 +28,13 @@ export default async function ArtworkPage({
 
   return (
     <div className="min-h-screen bg-[#F7F5F3]">
-              <div className="px-4 lg:px-12 py-4">
+      <div className="page-margins-wide py-6">
         <Link href="/" className="back-link">
           Back to Home
         </Link>
       </div>
       
-              <main className="px-4 lg:px-12 pb-8 pt-4">
+      <main className="page-margins-wide pb-8 pt-3">
         <div className="w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
             
