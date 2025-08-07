@@ -28,23 +28,23 @@ export default async function ArtworkPage({
 
   return (
     <div className="min-h-screen bg-[#F7F5F3]">
-      <div className="page-margins-wide py-6">
+      <div className="page-margins-wide py-4 lg:py-6">
         <Link href="/" className="back-link">
           Back to Home
         </Link>
       </div>
       
-      <main className="page-margins-wide pb-8 pt-3">
+      <main className="page-margins-wide pb-8 pt-4 lg:pt-3">
         <div className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-24">
             
             {/* Left Section - Artwork Image */}
             <div className="space-y-4">
-              <div className="w-full h-[50vh] lg:h-[75vh]">
+              <div className="w-full h-auto lg:h-[75vh]">
                 <img 
                   src={artwork.imageUrl} 
                   alt={artwork.title}
-                  className="w-full h-full object-contain"
+                  className="w-full h-auto lg:h-full lg:object-contain"
                 />
               </div>
             </div>
