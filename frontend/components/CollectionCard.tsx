@@ -1,9 +1,7 @@
 import Link from 'next/link';
 import { Collection } from '@/types/artwork';
 
-interface CollectionCardProps {
-  collection: Collection;
-}
+interface CollectionCardProps {collection: Collection;}
 
 export default function CollectionCard({ collection }: CollectionCardProps) {
   // Check if it's a year collection (4 digits)
@@ -24,13 +22,9 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
         ) : null}
         
         {isYear ? (
-          <div className="collection-number">
-            {yearText}
-          </div>
+          <div className="collection-number">{yearText}</div>
         ) : (
-          <div className="collection-text">
-            {collection.name}
-          </div>
+          <div className="collection-text">{collection.name}</div>
         )}
       </div>
     </Link>
