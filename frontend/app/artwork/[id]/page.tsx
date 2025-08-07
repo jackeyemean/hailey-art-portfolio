@@ -36,7 +36,7 @@ export default async function ArtworkPage({
       
       <main className="page-margins-wide pb-8 pt-4 lg:pt-3">
         <div className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-24">
             
             {/* Left Section - Artwork Image */}
             <div className="space-y-4">
