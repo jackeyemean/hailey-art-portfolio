@@ -8,6 +8,8 @@ export interface Artwork {
   dimensions: string;
   createdAt: string;
   isArtistPick: boolean;
+  isCollectionPick: boolean;
+  viewOrder?: number;
 }
 
 export interface Collection {

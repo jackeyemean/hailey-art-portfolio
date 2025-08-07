@@ -1,6 +1,6 @@
 import Header from '@/components/Header';
 import CollectionCard from '@/components/CollectionCard';
-import { fetchArtworks, fetchCollections, fetchArtistPick } from '@/lib/api';
+import { fetchArtworks, fetchCollections, fetchArtistPick, fetchCollectionPick } from '@/lib/api';
 import { Collection, Artwork } from '@/types/artwork';
 import Link from 'next/link';
 
@@ -14,30 +14,32 @@ export default async function HomePage() {
   const artistPick = await fetchArtistPick();
   
   // Create collection objects with counts, filtering out empty names
-  const collections: Collection[] = collectionNames
-    .filter(name => name.trim() !== '') // Filter out empty collection names
-    .map(name => {
-      const count = artworks.filter(art => art.collection === name).length;
-      const thumbnail = artworks.find(art => art.collection === name)?.imageUrl;
-      return { name, count, thumbnail };
-    })
-    .sort((a, b) => {
-      // Check if both are numbers
-      const aIsNumber = !isNaN(Number(a.name));
-      const bIsNumber = !isNaN(Number(b.name));
-      
-      // If both are numbers, sort numerically in descending order
-      if (aIsNumber && bIsNumber) {return Number(b.name) - Number(a.name);}
-      
-      // If only a is a number, a comes first
-      if (aIsNumber && !bIsNumber) {return -1;}
-      
-      // If only b is a number, b comes first
-      if (!aIsNumber && bIsNumber) {return 1;}
-      
-      // If both are text, sort alphabetically in descending order
-      return b.name.localeCompare(a.name);
-    });
+  const collections: Collection[] = (await Promise.all(
+    collectionNames
+      .filter(name => name.trim() !== '') // Filter out empty collection names
+      .map(async (name) => {
+        const count = artworks.filter(art => art.collection === name).length;
+        const collectionPick = await fetchCollectionPick(name);
+        const thumbnail = collectionPick?.imageUrl || artworks.find(art => art.collection === name)?.imageUrl;
+        return { name, count, thumbnail };
+      })
+  )).sort((a, b) => {
+    // Check if both are numbers
+    const aIsNumber = !isNaN(Number(a.name));
+    const bIsNumber = !isNaN(Number(b.name));
+    
+    // If both are numbers, sort numerically in descending order
+    if (aIsNumber && bIsNumber) {return Number(b.name) - Number(a.name);}
+    
+    // If only a is a number, a comes first
+    if (aIsNumber && !bIsNumber) {return -1;}
+    
+    // If only b is a number, b comes first
+    if (!aIsNumber && bIsNumber) {return 1;}
+    
+    // If both are text, sort alphabetically in descending order
+    return b.name.localeCompare(a.name);
+  });
 
   return (
     <div className="bg-[#F7F5F3]">

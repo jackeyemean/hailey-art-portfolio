@@ -139,6 +139,8 @@ export default function ArtworkForm({ route, navigation }: Props) {
   const [medium, setMedium]           = useState('');
   const [dimensions, setDimensions]   = useState('');
   const [isArtistPick, setIsArtistPick] = useState(false);
+  const [isCollectionPick, setIsCollectionPick] = useState(false);
+  const [viewOrder, setViewOrder] = useState('');
   const [uri, setUri]                 = useState<string | null>(null);
   const [isNewImage, setIsNewImage]   = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -161,6 +163,8 @@ export default function ArtworkForm({ route, navigation }: Props) {
         setMedium(art.medium);
         setDimensions(art.dimensions);
         setIsArtistPick(art.isArtistPick || false);
+        setIsCollectionPick(art.isCollectionPick || false);
+        setViewOrder(art.viewOrder?.toString() || '');
         const existing = art.imageUrl.startsWith('http')
           ? art.imageUrl
           : `${BUCKET_URL}/${art.imageUrl}`;
@@ -219,6 +223,8 @@ export default function ArtworkForm({ route, navigation }: Props) {
     form.append('medium', medium.trim());
     form.append('dimensions', dimensions.trim());
     form.append('isArtistPick', isArtistPick.toString());
+    form.append('isCollectionPick', isCollectionPick.toString());
+    form.append('viewOrder', viewOrder.trim());
 
     const url = artworkId
       ? `${API_URL}/artworks/${artworkId}`
@@ -368,6 +374,41 @@ export default function ArtworkForm({ route, navigation }: Props) {
               ? "This artwork will be featured on the homepage. Any existing artist's pick will be unset."
               : "Enable to feature this artwork on the homepage"
             }
+          </Text>
+        </View>
+
+        {/* Collection Pick Toggle */}
+        <View style={styles.inputGroup}>
+          <View style={styles.switchContainer}>
+            <Text style={styles.label}>Set as Collection Card Image</Text>
+            <Switch
+              value={isCollectionPick}
+              onValueChange={setIsCollectionPick}
+              trackColor={{ false: isDark ? '#333' : '#ccc', true: isDark ? '#0A84FF' : '#007AFF' }}
+              thumbColor={isCollectionPick ? '#fff' : isDark ? '#666' : '#f4f3f4'}
+            />
+          </View>
+          <Text style={styles.helperText}>
+            {isCollectionPick 
+              ? "This artwork will be used as the collection card image. Any existing collection pick in this collection will be unset."
+              : "Enable to use this artwork as the collection card image"
+            }
+          </Text>
+        </View>
+
+        {/* View Order */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>View Order</Text>
+          <TextInput
+            placeholder="e.g. 1 (smaller numbers appear first)"
+            placeholderTextColor={styles.placeholder.color}
+            style={styles.input}
+            value={viewOrder}
+            onChangeText={setViewOrder}
+            keyboardType="numeric"
+          />
+          <Text style={styles.helperText}>
+            Optional: Lower numbers appear first in the collection grid. Leave empty for default order.
           </Text>
         </View>
 

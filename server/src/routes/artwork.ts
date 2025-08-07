@@ -34,15 +34,28 @@ router.post(
         });
       }
 
+      // If this artwork is being set as collection pick, unset any existing collection pick in the same collection
+      if (req.body.isCollectionPick === 'true') {
+        await prisma.artwork.updateMany({
+          where: { 
+            isCollectionPick: true,
+            collection: req.body.collection
+          },
+          data: { isCollectionPick: false }
+        });
+      }
+
       const artwork = await prisma.artwork.create({
         data: {
-          title:       req.body.title,
-          description: req.body.description,
+          title:           req.body.title,
+          description:     req.body.description,
           imageUrl,
-          collection:  req.body.collection,
-          medium:      req.body.medium,
-          dimensions:  req.body.dimensions,
-          isArtistPick: req.body.isArtistPick === 'true',
+          collection:      req.body.collection,
+          medium:          req.body.medium,
+          dimensions:      req.body.dimensions,
+          isArtistPick:    req.body.isArtistPick === 'true',
+          isCollectionPick: req.body.isCollectionPick === 'true',
+          viewOrder:       req.body.viewOrder ? parseInt(req.body.viewOrder) : null,
         },
       });
 
@@ -61,6 +74,10 @@ router.get("/artworks", async (req, res, next) => {
       where: collection
         ? { collection }            // filter if ?collection=2025
         : {},                       // no filter otherwise
+      orderBy: [
+        { viewOrder: 'asc' },       // First by view order (nulls last)
+        { createdAt: 'desc' }       // Then by creation date
+      ],
     });
     res.json(artworks);
   } catch (err) {
@@ -75,6 +92,21 @@ router.get("/artworks/artist-pick", async (req, res, next) => {
       where: { isArtistPick: true },
     });
     res.json(artistPick);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Fetch collection pick for a specific collection
+router.get("/artworks/collection-pick/:collection", async (req, res, next) => {
+  try {
+    const collectionPick = await prisma.artwork.findFirst({
+      where: { 
+        isCollectionPick: true,
+        collection: req.params.collection
+      },
+    });
+    res.json(collectionPick);
   } catch (err) {
     next(err);
   }
@@ -108,6 +140,8 @@ router.put(
         medium,
         dimensions,
         isArtistPick,
+        isCollectionPick,
+        viewOrder,
       } = req.body;
 
       // fetch record
@@ -136,6 +170,18 @@ router.put(
         });
       }
 
+      // If this artwork is being set as collection pick, unset any existing collection pick in the same collection
+      if (isCollectionPick === 'true') {
+        await prisma.artwork.updateMany({
+          where: { 
+            isCollectionPick: true,
+            collection: collection,
+            id: { not: id } // Don't unset the current artwork
+          },
+          data: { isCollectionPick: false }
+        });
+      }
+
       // update all fields
       const updated = await prisma.artwork.update({
         where: { id },
@@ -147,6 +193,8 @@ router.put(
           dimensions,
           imageUrl,
           isArtistPick: isArtistPick === 'true',
+          isCollectionPick: isCollectionPick === 'true',
+          viewOrder: viewOrder ? parseInt(viewOrder) : null,
         },
       });
 

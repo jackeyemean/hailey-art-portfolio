@@ -39,6 +39,19 @@ export async function fetchArtistPick(): Promise<Artwork | null> {
   return response.json();
 }
 
+export async function fetchCollectionPick(collection: string): Promise<Artwork | null> {
+  const response = await fetch(`${API_BASE_URL}/artworks/collection-pick/${encodeURIComponent(collection)}`, {
+    cache: 'no-store' // Disable caching
+  });
+  if (!response.ok) {
+    if (response.status === 404) {
+      return null; // No collection pick set
+    }
+    throw new Error(`Failed to fetch collection pick: ${response.status}`);
+  }
+  return response.json();
+}
+
 export async function fetchCollections(): Promise<string[]> {
   const artworks = await fetchArtworks();
   const collections = [...new Set(artworks.map(art => art.collection))];
