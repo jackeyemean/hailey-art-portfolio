@@ -1,5 +1,6 @@
 import Header from '@/components/Header';
 import CollectionCard from '@/components/CollectionCard';
+import InteractiveLink from '@/components/InteractiveLink';
 import { fetchArtworks, fetchCollections, fetchArtistPick } from '@/lib/api';
 import { Collection, Artwork } from '@/types/artwork';
 import Link from 'next/link';
@@ -64,9 +65,9 @@ export default async function HomePage() {
               </div>
               
               {artistPick?.collection && (
-                <Link href={`/collection/${artistPick.collection}`} className="space-y-1 block">
-                  <p className="body-medium">View More From</p>
-                  <p className="heading-small">The {artistPick.collection} Collection</p>
+                <Link href={`/collection/${artistPick.collection}`} className="space-y-1 block collection-link">
+                  <p className="body-large">View More From</p>
+                  <p className="heading-small collection-title">The {artistPick.collection} Collection</p>
                 </Link>
               )}
             </div>

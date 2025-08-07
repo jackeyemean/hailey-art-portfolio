@@ -32,7 +32,7 @@ export default async function CollectionPage({
   const formattedTitle = formatCollectionTitle(decodedCollectionName);
 
   return (
-    <div className="min-h-screen bg-[#DFE2E4]">
+    <div className="min-h-screen bg-[#F7F5F3]">
       <div className="px-4 lg:px-16 py-8">
         <Link href="/" className="back-link">
           Back to Home

@@ -10,7 +10,7 @@ export default async function AboutPage() {
   const profile: Profile = await fetchProfile();
   
   return (
-    <div className="bg-[#DFE2E4]">
+    <div className="bg-[#F7F5F3]">
       <div className="px-4 lg:px-16 py-4 lg:py-6">
         <Link href="/" className="back-link">
           Back

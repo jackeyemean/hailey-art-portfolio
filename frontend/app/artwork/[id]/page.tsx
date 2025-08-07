@@ -15,7 +15,7 @@ export default async function ArtworkPage({
 
   if (!artwork) {
     return (
-      <div className="min-h-screen bg-[#DFE2E4] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F7F5F3] flex items-center justify-center">
         <div className="text-center">
           <h1 className="heading-medium mb-4">Artwork not found</h1>
           <Link href="/" className="back-link">
@@ -27,7 +27,7 @@ export default async function ArtworkPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#DFE2E4]">
+    <div className="min-h-screen bg-[#F7F5F3]">
               <div className="px-4 lg:px-12 py-4">
         <Link href="/" className="back-link">
           Back to Home
@@ -56,7 +56,7 @@ export default async function ArtworkPage({
                   "{artwork.title}"
                 </h1>
                 
-                <div className="body-large space-y-3 leading-relaxed">
+                <div className="body-medium space-y-3 leading-relaxed">
                   {artwork.description && (
                     <p>{artwork.description}</p>
                   )}
@@ -70,7 +70,7 @@ export default async function ArtworkPage({
               </div>
               
               <div className="pt-4">
-                <Link href={`/collection/${artwork.collection}`} className="body-medium hover:opacity-80 transition-opacity">
+                <Link href={`/collection/${artwork.collection}`} className="body-large hover:opacity-80 transition-opacity">
                   View More From {artwork.collection}
                 </Link>
               </div>
