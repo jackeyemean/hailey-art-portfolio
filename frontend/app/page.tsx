@@ -38,15 +38,13 @@ export default async function HomePage() {
       // If both are text, sort alphabetically in descending order
       return b.name.localeCompare(a.name);
     });
-  
-  console.log('Collections:', collections);
 
   return (
     <div className="bg-[#F7F5F3]">
       <Header />
       <main className="page-margins py-3">
         <div className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-40">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20">
             
             {/* Left Section - Artist's Pick */}
             <div className="flex flex-col justify-between items-start h-full">
