@@ -1,6 +1,5 @@
 import Header from '@/components/Header';
 import CollectionCard from '@/components/CollectionCard';
-import InteractiveLink from '@/components/InteractiveLink';
 import { fetchArtworks, fetchCollections, fetchArtistPick } from '@/lib/api';
 import { Collection, Artwork } from '@/types/artwork';
 import Link from 'next/link';
