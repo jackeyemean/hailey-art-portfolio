@@ -62,9 +62,9 @@ export default async function ArtworkPage({
                   )}
                   
                   <div className="space-y-2">
-                    <p><strong>Collection:</strong> {artwork.collection}</p>
-                    <p><strong>Medium:</strong> {artwork.medium}</p>
-                    <p><strong>Dimensions:</strong> {artwork.dimensions}</p>
+                    <p>{artwork.collection}</p>
+                    <p>{artwork.medium}</p>
+                    <p>{artwork.dimensions}</p>
                   </div>
                 </div>
               </div>

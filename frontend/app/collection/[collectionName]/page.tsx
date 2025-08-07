@@ -41,7 +41,7 @@ export default async function CollectionPage({
       
       <main className="page-margins pb-12 pt-3">
         <div className="w-full">
-          <div className="text-center mb-6">
+          <div className="text-center mb-10">
             <h1 className="heading-medium">
               {formattedTitle}
             </h1>
