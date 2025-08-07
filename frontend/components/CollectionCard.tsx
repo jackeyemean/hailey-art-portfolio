@@ -11,9 +11,6 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
   
   // For year collections, extract last 2 digits
   const yearText = isYear ? collection.name.slice(-2) : '';
-  
-  // Check if it's a sketch collection
-  const isSketch = collection.name.toLowerCase().includes('sketch');
 
   return (
     <Link href={`/collection/${encodeURIComponent(collection.name)}`} className="group">
@@ -26,11 +23,7 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
           />
         ) : null}
         
-        {isSketch ? (
-          <div className="collection-text">
-            Sketch
-          </div>
-        ) : isYear ? (
+        {isYear ? (
           <div className="collection-number">
             {yearText}
           </div>

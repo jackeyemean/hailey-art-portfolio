@@ -217,6 +217,9 @@ html {
   font-weight: 400;
   color: #000000;
 }
+.heading-small:hover {
+  text-decoration: underline;
+}
 
 .body-large {
   font-family: 'NanumMyeongjo', serif;
