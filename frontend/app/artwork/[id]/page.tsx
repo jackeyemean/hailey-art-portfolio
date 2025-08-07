@@ -56,15 +56,17 @@ export default async function ArtworkPage({
                   "{artwork.title}"
                 </h1>
                 
-                <div className="body-medium space-y-3 leading-relaxed">
+                <div className="space-y-6">
                   {artwork.description && (
-                    <p>{artwork.description}</p>
+                    <div className="py-4">
+                      <p className="body-medium max-w-md" style={{ lineHeight: '1.1' }}>{artwork.description}</p>
+                    </div>
                   )}
                   
                   <div className="space-y-2">
-                    <p>{artwork.collection}</p>
-                    <p>{artwork.medium}</p>
-                    <p>{artwork.dimensions}</p>
+                    <p className="body-medium">{artwork.collection}</p>
+                    <p className="body-medium">{artwork.medium}</p>
+                    <p className="body-medium">{artwork.dimensions}</p>
                   </div>
                 </div>
               </div>
