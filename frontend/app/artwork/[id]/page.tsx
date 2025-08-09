@@ -70,9 +70,15 @@ export default async function ArtworkPage({
       {/* Top navigation bar */}
       <div className="page-margins-wide py-4 lg:py-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-24">
-          <div className="flex justify-start">
+          <div className="flex justify-between items-center lg:justify-start">
             <Link href="/" className="back-link opacity-60 hover:opacity-100 transition-opacity">
               Back to Home
+            </Link>
+            <Link 
+              href={`/collection/${artwork.collection}`}
+              className="back-link opacity-60 hover:opacity-100 transition-opacity lg:hidden"
+            >
+              View Collection
             </Link>
           </div>
         </div>
@@ -91,6 +97,24 @@ export default async function ArtworkPage({
                   alt={artwork.title}
                   className="w-full h-auto lg:h-full lg:object-contain"
                 />
+              </div>
+              
+              {/* Mobile navigation under image */}
+              <div className="pt-6 border-t border-black/20 lg:hidden">
+                <div className="flex justify-between items-center">
+                  <Link 
+                    href={`/artwork/${prevArtwork.id}`}
+                    className="back-link opacity-60 hover:opacity-100 transition-opacity"
+                  >
+                    ← Previous
+                  </Link>
+                  <Link 
+                    href={`/artwork/${nextArtwork.id}`}
+                    className="back-link opacity-60 hover:opacity-100 transition-opacity"
+                  >
+                    Next →
+                  </Link>
+                </div>
               </div>
             </div>
             
@@ -121,19 +145,19 @@ export default async function ArtworkPage({
                 <div className="flex justify-between items-center">
                   <Link 
                     href={`/artwork/${prevArtwork.id}`}
-                    className="back-link opacity-60 hover:opacity-100 transition-opacity"
+                    className="back-link opacity-60 hover:opacity-100 transition-opacity hidden lg:block"
                   >
                     ← Previous
                   </Link>
                   <Link 
                     href={`/collection/${artwork.collection}`}
-                    className="back-link opacity-60 hover:opacity-100 transition-opacity"
+                    className="back-link opacity-60 hover:opacity-100 transition-opacity hidden lg:block"
                   >
                     View Collection
                   </Link>
                   <Link 
                     href={`/artwork/${nextArtwork.id}`}
-                    className="back-link opacity-60 hover:opacity-100 transition-opacity"
+                    className="back-link opacity-60 hover:opacity-100 transition-opacity hidden lg:block"
                   >
                     Next →
                   </Link>
