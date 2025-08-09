@@ -123,6 +123,13 @@ html {
   object-fit: cover;
 }
 
+/* Mobile padding for artist pick section */
+@media (max-width: 1023px) {
+  .artist-pick-section {
+    gap: 0.5rem;
+  }
+}
+
 .artwork-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
