@@ -121,21 +121,21 @@ export default async function ArtworkPage({
             {/* Right Section - Artwork Details */}
             <div className="space-y-6 flex flex-col lg:justify-between lg:min-h-[75vh]">
               <div className="space-y-4">
-                <h1 className="heading-large leading-tight">
+                <h1 className="artwork-title leading-tight">
                   {artwork.title}
                 </h1>
                 
                 <div className="space-y-6">
                   {artwork.description && (
                     <div className="py-4">
-                      <p className="body-medium max-w-[16rem]" style={{ lineHeight: '1.1' }}>{artwork.description}</p>
+                      <p className="artwork-description max-w-[16rem]" style={{ lineHeight: '1.1' }}>{artwork.description}</p>
                     </div>
                   )}
                   
                   <div className="space-y-2">
-                    <p className="body-medium">{artwork.collection}</p>
-                    <p className="body-medium">{artwork.medium}</p>
-                    <p className="body-medium">{artwork.dimensions}</p>
+                    <p className="artwork-description">{artwork.collection}</p>
+                    <p className="artwork-description">{artwork.medium}</p>
+                    <p className="artwork-description">{artwork.dimensions}</p>
                   </div>
                 </div>
               </div>

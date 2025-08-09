@@ -256,6 +256,37 @@ html {
   color: #000000;
 }
 
+/* Artwork page specific typography */
+.artwork-title {
+  font-family: 'NanumMyeongjo', serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: clamp(28px, 7vw, 62px);
+  line-height: 1.1;
+  color: #000000;
+}
+
+@media (min-width: 1024px) {
+  .artwork-title {
+    font-size: clamp(32px, 8vw, 62px);
+  }
+}
+
+.artwork-description {
+  font-family: 'NanumMyeongjo', serif;
+  font-size: clamp(14px, 2.5vw, 16px);
+  line-height: 1.2;
+  font-weight: 300;
+  color: #000000;
+}
+
+@media (min-width: 1024px) {
+  .artwork-description {
+    font-size: clamp(10px, 2vw, 16px);
+    line-height: 0.9;
+  }
+}
+
 .collection-link:hover .collection-title {
   text-decoration: underline;
 }
