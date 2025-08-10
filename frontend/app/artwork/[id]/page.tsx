@@ -128,7 +128,7 @@ export default async function ArtworkPage({
                 <div className="space-y-6">
                   {artwork.description && (
                     <div className="py-4">
-                      <p className="artwork-description max-w-[16rem]" style={{ lineHeight: '1.1' }}>{artwork.description}</p>
+                      <p className="artwork-description max-w-[17rem]" style={{ lineHeight: '1.1' }}>{artwork.description}</p>
                     </div>
                   )}
                   
