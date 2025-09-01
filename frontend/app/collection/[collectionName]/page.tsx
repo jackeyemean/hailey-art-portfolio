@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { fetchArtworks } from '@/lib/api';
 import { Artwork } from '@/types/artwork';
+import NavigationTracker from '@/components/NavigationTracker';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -53,6 +54,7 @@ export default async function CollectionPage({
 
   return (
     <div className="min-h-screen bg-[#F7F5F3]">
+      <NavigationTracker collectionName={decodedCollectionName} />
       <div className="page-margins py-6">
         <Link href="/" className="back-link">
           Back to Home

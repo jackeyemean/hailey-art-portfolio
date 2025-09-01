@@ -1,5 +1,6 @@
 import Header from '@/components/Header';
 import CollectionCard from '@/components/CollectionCard';
+import NavigationTracker from '@/components/NavigationTracker';
 import { fetchArtworks, fetchCollections, fetchArtistPick, fetchCollectionPick } from '@/lib/api';
 import { Collection, Artwork } from '@/types/artwork';
 import Link from 'next/link';
@@ -43,6 +44,7 @@ export default async function HomePage() {
 
   return (
     <div className="bg-[#F7F5F3]">
+      <NavigationTracker />
       <Header />
       <main className="page-margins py-3">
         <div className="w-full">

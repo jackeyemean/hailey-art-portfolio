@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { fetchArtworks } from '@/lib/api';
 import { Artwork } from '@/types/artwork';
+import BackButton from '@/components/BackButton';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -18,9 +19,7 @@ export default async function ArtworkPage({
       <div className="min-h-screen bg-[#F7F5F3] flex items-center justify-center">
         <div className="text-center">
           <h1 className="heading-medium mb-4">Artwork not found</h1>
-          <Link href="/" className="back-link">
-            Back to Home
-          </Link>
+          <BackButton />
         </div>
       </div>
     );
@@ -71,9 +70,7 @@ export default async function ArtworkPage({
       <div className="page-margins-wide py-4 lg:py-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-24">
           <div className="flex justify-between items-center lg:justify-start">
-            <Link href="/" className="back-link opacity-60 hover:opacity-100 transition-opacity">
-              Back to Home
-            </Link>
+            <BackButton />
             <Link 
               href={`/collection/${artwork.collection}`}
               className="back-link opacity-60 hover:opacity-100 transition-opacity lg:hidden"
