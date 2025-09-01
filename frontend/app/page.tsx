@@ -49,7 +49,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20">
             
             {/* Left Section - Artist's Pick */}
-            <div className="flex flex-col justify-between items-start h-full artist-pick-section">
+            <div className="flex flex-col items-start artist-pick-section">
               <div className="flex flex-col space-y-4">
                 <h2 className="heading-medium">Artist's Pick</h2>
                 {artistPick && (<p className="body-medium">"{artistPick.title}"</p>)}
@@ -64,7 +64,7 @@ export default async function HomePage() {
               </div>
               
               {artistPick?.collection && (
-                <Link href={`/collection/${artistPick.collection}`} className="space-y-1 block collection-link">
+                <Link href={`/collection/${artistPick.collection}`} className="space-y-1 block collection-link mt-4">
                   <p className="body-large">View More From</p>
                   <p className="heading-small collection-title">The {artistPick.collection} Collection</p>
                 </Link>
