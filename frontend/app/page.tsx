@@ -46,7 +46,7 @@ export default async function HomePage() {
     <div className="bg-[#F7F5F3]">
       <NavigationTracker />
       <Header />
-      <main className="page-margins py-3">
+      <main className="page-margins py-3 pb-10">
         <div className="w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20">
             
