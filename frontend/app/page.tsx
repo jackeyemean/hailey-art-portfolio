@@ -78,12 +78,7 @@ export default async function HomePage() {
                   <p className="body-medium">Personal projects, over the years.</p>
                 </div>
                 
-                <div className="grid grid-rows-2 gap-2 home-collections mt-4" 
-                  style={{ 
-                    gridTemplateColumns: `repeat(${Math.max(2, Math.ceil(collections.length / 2))}, 1fr)`,
-                    gap: '8px',
-                    alignContent: 'end'
-                  }}>
+                <div className="grid grid-cols-2 gap-2 home-collections mt-4">
                   {collections.length > 0 ? (
                     collections.map((collection) => (
                       <div key={collection.name} className="w-full"><CollectionCard collection={collection} /></div>
