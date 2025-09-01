@@ -52,10 +52,14 @@ export default async function HomePage() {
             
             {/* Left Section - Artist's Pick */}
             <div className="flex flex-col items-start artist-pick-section">
-              <div className="flex flex-col space-y-4">
-                <h2 className="heading-medium">Artist's Pick</h2>
-                {artistPick && (<p className="body-medium">"{artistPick.title}"</p>)}
-                
+              {/* Title Level - aligned with Collections title */}
+              <h2 className="heading-medium">Artist's Pick</h2>
+              
+              {/* Subtitle Level - aligned with Personal Projects subtitle */}
+              {artistPick && (<p className="body-medium mt-2">"{artistPick.title}"</p>)}
+              
+              {/* Content Level - aligned with collections grid */}
+              <div className="mt-4">
                 {artistPick ? (
                   <Link href={`/artwork/${artistPick.id}`}>
                     <div className="artist-pick-card">
@@ -74,19 +78,21 @@ export default async function HomePage() {
             </div>
             
             {/* Right Section - Collections */}
-            <div className="flex flex-col items-start h-full lg:ml-8">
-                <div className="flex flex-col space-y-2">
-                  <h2 className="heading-medium">Collections</h2>
-                  <p className="body-medium">Personal projects, over the years.</p>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2 home-collections mt-4">
-                  {collections.length > 0 ? (
-                    collections.map((collection) => (
-                      <div key={collection.name} className="w-full"><CollectionCard collection={collection} /></div>
-                    ))
-                  ) : (<div className="col-span-full text-center py-8"><p className="text-[#000000]">No collections found</p></div>)}
-                </div>
+            <div className="flex flex-col items-start h-full">
+              {/* Title Level - aligned with Artist's Pick title */}
+              <h2 className="heading-medium">Collections</h2>
+              
+              {/* Subtitle Level - aligned with artwork title */}
+              <p className="body-medium mt-2">Personal projects, over the years.</p>
+              
+              {/* Content Level - aligned with artist pick image */}
+              <div className="grid grid-cols-2 gap-2 home-collections mt-4">
+                {collections.length > 0 ? (
+                  collections.map((collection) => (
+                    <div key={collection.name} className="w-full"><CollectionCard collection={collection} /></div>
+                  ))
+                ) : (<div className="col-span-full text-center py-8"><p className="text-[#000000]">No collections found</p></div>)}
+              </div>
             </div>
           </div>
         </div>
