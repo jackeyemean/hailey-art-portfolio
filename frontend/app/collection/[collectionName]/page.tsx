@@ -27,8 +27,9 @@ export default async function CollectionPage({
   params: { collectionName: string } 
 }) {
   const artworks = await fetchArtworks();
+  const decodedCollectionName = decodeURIComponent(params.collectionName);
   const collectionArtworks = artworks
-    .filter(art => art.collection === params.collectionName)
+    .filter(art => art.collection === decodedCollectionName)
     .sort((a, b) => {
       // Sort by viewOrder first (ascending), then by createdAt for those without viewOrder (descending - newest first)
       const aViewOrder = a.viewOrder !== undefined && a.viewOrder !== null ? a.viewOrder : null;
@@ -48,8 +49,6 @@ export default async function CollectionPage({
       // For artworks without viewOrder, sort by createdAt in descending order (newest first)
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
-  
-  const decodedCollectionName = decodeURIComponent(params.collectionName);
   const formattedTitle = formatCollectionTitle(decodedCollectionName);
 
   return (
