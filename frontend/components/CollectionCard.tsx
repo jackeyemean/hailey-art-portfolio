@@ -24,7 +24,11 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
         {isYear ? (
           <div className="collection-number">{yearText}</div>
         ) : (
-          <div className="collection-text">{collection.name}</div>
+          <div className="collection-text">
+            {collection.name.split(' ').map((word, index) => (
+              <span key={index}>{word}</span>
+            ))}
+          </div>
         )}
       </div>
     </Link>
