@@ -8,9 +8,9 @@ export const dynamic = 'force-dynamic';
 
 function formatCollectionTitle(collectionName: string): string {
   if (/^\d{4}$/.test(collectionName)) {
-    return `${collectionName} Collection`;
+    return `The ${collectionName} Collection`;
   }
-  return `${collectionName} Collection`;
+  return `The ${collectionName} Collection`;
 }
 
 export default async function CollectionPage({ 

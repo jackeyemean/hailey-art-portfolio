@@ -14,9 +14,9 @@ export async function generateStaticParams() {
 
 function formatCollectionTitle(collectionName: string): string {
   if (/^\d{4}$/.test(collectionName)) {
-    return `${collectionName} Collection`;
+    return `The ${collectionName} Collection`;
   }
-  return `${collectionName} Collection`;
+  return `The${collectionName} Collection`;
 }
 
 export default async function CollectionPage({ 
