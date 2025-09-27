@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Artwork {
+  id            String   @id @default(uuid())     // UUID primary key
+  title         String                             // Required
+  description   String?                            // Optional
+  imageUrl      String                             // Will point to S3 later
+  collection    String                             // e.g. "Landscapes"
+  medium        String                             // e.g. "Oil on canvas"
+  dimensions    String                             // e.g. "30x40 in"
+  createdAt     DateTime @default(now())           // Timestamp
+  isArtistPick  Boolean @default(false)           // Artist's pick flag
+  isCollectionPick Boolean @default(false)        // Collection card image flag
+  viewOrder     Int?                              // Order in collection grid (smaller = earlier)
+}
+
+model Profile {
+  id          String   @id @default(uuid())     // UUID primary key
+  imageUrl    String?                            // Profile picture URL
+  description String?                            // Artist description
+  updatedAt   DateTime @updatedAt                // Last updated timestamp
+}
