@@ -68,6 +68,7 @@ async function downloadAndOptimizeImage(url: string, outputPath: string): Promis
           // Optimize image with Sharp - convert to WebP and resize
           const webpPath = outputPath.replace(/\.(jpg|jpeg|png)$/i, '.webp');
           await sharp(buffer)
+            .rotate() // Auto-rotate based on EXIF orientation
             .webp({ quality: 80 })
             .resize(1200, 1200, { 
               fit: 'inside', 
