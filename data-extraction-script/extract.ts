@@ -17,7 +17,7 @@ const s3 = new S3Client({
 });
 
 const BUCKET = process.env.S3_BUCKET!;
-const OUTPUT_DIR = '../final-static-frontend';
+const OUTPUT_DIR = '../static-site';
 const DATA_DIR = path.join(OUTPUT_DIR, 'public/data');
 const IMAGES_DIR = path.join(DATA_DIR, 'images');
 

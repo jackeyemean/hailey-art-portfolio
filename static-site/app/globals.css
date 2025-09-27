@@ -1,0 +1,355 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'NanumMyeongjo', serif;
+  background-color: #F7F5F3;
+  color: #000000;
+  min-width: 100%;
+  width: 100%;
+}
+
+html {
+  background-color: #F7F5F3;
+  min-width: 100%;
+  width: 100%;
+}
+
+.serif-font {
+  font-family: 'NanumMyeongjo', serif;
+}
+
+.mono-font {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+
+.hailey-pink {
+  color: #FF6B9D;
+}
+
+.back-link {
+  color: #000000;
+  text-decoration: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-style: normal;
+  font-weight: 400;
+  font-size: clamp(14px, 3.5vw, 18px);
+  line-height: 1.2;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.collection-card {
+  background-color: #000000;
+  aspect-ratio: 191/292;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transform-origin: center;
+  will-change: transform;
+  font-size: 2.5vw;
+}
+
+@media (min-width: 640px) {
+  .collection-card {
+    font-size: 1.8vw;
+  }
+}
+
+@media (min-width: 1024px) {
+  .collection-card {
+    font-size: 1vw;
+  }
+}
+
+.collection-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.collection-number {
+  position: absolute;
+  bottom: 0%;
+  right: 2%;
+  width: 50%;
+  height: 50%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 12em;
+  line-height: 0.8;
+  color: #F7F5F3;
+  text-shadow: 0 0 1px currentColor;
+}
+
+.collection-text {
+  position: absolute;
+  bottom: 2%;
+  right: 2%;
+  width: 90%;
+  height: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 4em;
+  line-height: 0.8;
+  color: #F7F5F3;
+  text-align: right;
+  text-shadow: 0 0 1px currentColor;
+  text-transform: uppercase;
+}
+
+@media (min-width: 640px) {
+  .collection-text {
+    font-size: 4.5em;
+  }
+}
+
+@media (min-width: 1024px) {
+  .collection-text {
+    font-size: 5em;
+  }
+}
+
+.artist-pick-card {
+  background-color: #000000;
+  aspect-ratio: 400/295;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  width: auto;
+  height: auto;
+  margin: 0;
+}
+
+.home-collections .collection-card {
+  aspect-ratio: 400/375;
+  height: 100%;
+  width: auto;
+  margin: 0;
+  font-size: 2vw;
+}
+
+@media (min-width: 640px) {
+  .home-collections .collection-card {
+    font-size: 1.4vw;
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-collections .collection-card {
+    font-size: 0.8vw;
+  }
+}
+
+.artist-pick-card:hover {
+  transform: scale(1.02);
+}
+
+.artist-pick-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Mobile padding for artist pick section - removed gap to use consistent margin classes */
+
+.artwork-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.artwork-card {
+  background-color: #000000;
+  aspect-ratio: 386/600;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.artwork-card:hover {
+  transform: scale(1.02);
+}
+
+.artwork-card img {
+  aspect-ratio: 200/475;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.social-icons {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.social-icon {
+  width: clamp(24px, 3vw, 40px);
+  height: clamp(24px, 3vw, 40px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.social-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Typography classes */
+.heading-large {
+  font-family: 'NanumMyeongjo', serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: clamp(32px, 8vw, 62px);
+  line-height: 1.1;
+  color: #000000;
+}
+
+.heading-large-medium {
+  font-family: 'NanumMyeongjo', serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: clamp(24px, 6vw, 44px);
+  line-height: 1.1;
+  color: #000000;
+}
+
+.heading-large-small {
+  font-family: 'NanumMyeongjo', serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: clamp(28px, 7vw, 52px);
+  line-height: 1.1;
+  color: #000000;
+}
+
+.heading-medium {
+  font-family: 'NanumMyeongjo', serif;
+  font-size: clamp(18px, 4.5vw, 32px);
+  line-height: 1;
+  font-weight: 400;
+  color: #000000;
+}
+
+.heading-small {
+  font-family: 'NanumMyeongjo', serif;
+  font-size: clamp(14px, 3.5vw, 24px);
+  line-height: 1;
+  font-weight: 400;
+  color: #4A4A4A;
+}
+.heading-small:hover {
+  text-decoration: underline;
+}
+
+.body-large {
+  font-family: 'NanumMyeongjo', serif;
+  font-size: clamp(12px, 2.5vw, 18px);
+  line-height: 1.3;
+  font-weight: 300;
+  color: #4A4A4A;
+}
+
+.body-medium {
+  font-family: 'NanumMyeongjo', serif;
+  font-size: clamp(10px, 2vw, 16px);
+  line-height: 0.9;
+  font-weight: 300;
+  color: #000000;
+}
+
+.body-small {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(10px, 2vw, 16px);
+  line-height: 1.3;
+  font-weight: 300;
+  color: #000000;
+}
+
+.mono-medium {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(12px, 2.5vw, 18px);
+  line-height: 1.3;
+  font-weight: 300;
+  color: #000000;
+}
+
+/* Artwork page specific typography */
+.artwork-title {
+  font-family: 'NanumMyeongjo', serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: clamp(28px, 7vw, 62px);
+  line-height: 1.1;
+  color: #000000;
+}
+
+@media (min-width: 1024px) {
+  .artwork-title {
+    font-size: clamp(32px, 8vw, 62px);
+  }
+}
+
+.artwork-description {
+  font-family: 'NanumMyeongjo', serif;
+  font-size: clamp(14px, 2.5vw, 16px);
+  line-height: 1.2;
+  font-weight: 300;
+  color: #000000;
+}
+
+@media (min-width: 1024px) {
+  .artwork-description {
+    font-size: clamp(10px, 2vw, 16px);
+    line-height: 0.9;
+  }
+}
+
+.collection-link:hover .collection-title {
+  text-decoration: underline;
+}
+
+.page-margins {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .page-margins {
+    padding-left: 7rem;
+    padding-right: 7rem;
+  }
+}
+
+.page-margins-wide {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .page-margins-wide {
+    padding-left: 7rem;
+    padding-right: 7rem;
+  }
+}
