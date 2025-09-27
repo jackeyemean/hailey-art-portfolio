@@ -5,6 +5,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import https from 'https';
 import http from 'http';
+import sharp from 'sharp';
 
 // clients
 const prisma = new PrismaClient();
@@ -44,9 +45,10 @@ interface ProfileData {
   updatedAt?: string;
 }
 
-async function downloadImage(url: string, outputPath: string): Promise<void> {
+async function downloadAndOptimizeImage(url: string, outputPath: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const protocol = url.startsWith('https:') ? https : http;
+    const chunks: Buffer[] = [];
     
     protocol.get(url, (response) => {
       if (response.statusCode !== 200) {
@@ -54,16 +56,36 @@ async function downloadImage(url: string, outputPath: string): Promise<void> {
         return;
       }
 
-      const fileStream = fs.createWriteStream(outputPath);
-      response.pipe(fileStream);
-
-      fileStream.on('finish', () => {
-        fileStream.close();
-        resolve();
+      response.on('data', (chunk) => {
+        chunks.push(chunk);
       });
 
-      fileStream.on('error', (err) => {
-        fs.unlink(outputPath).catch(() => {});
+      response.on('end', async () => {
+        try {
+          const buffer = Buffer.concat(chunks);
+          const originalSize = buffer.length;
+          
+          // Optimize image with Sharp - convert to WebP and resize
+          const webpPath = outputPath.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+          await sharp(buffer)
+            .webp({ quality: 80 })
+            .resize(1200, 1200, { 
+              fit: 'inside', 
+              withoutEnlargement: true 
+            })
+            .toFile(webpPath);
+            
+          const stats = await fs.stat(webpPath);
+          const compression = Math.round((1 - stats.size/originalSize) * 100);
+          console.log(`   Optimized: ${(originalSize/1024/1024).toFixed(2)}MB → ${(stats.size/1024/1024).toFixed(2)}MB (${compression}% smaller)`);
+            
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      response.on('error', (err) => {
         reject(err);
       });
     }).on('error', (err) => {
@@ -96,16 +118,17 @@ async function extractArtworks(): Promise<ArtworkData[]> {
 
   for (const artwork of artworks) {
     const filename = getImageFilename(artwork.imageUrl);
-    const localImagePath = `/data/images/${filename}`;
+    const localImagePath = `/data/images/${filename.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`;
     const fullImagePath = path.join(IMAGES_DIR, filename);
 
-    console.log(`Downloading image for "${artwork.title}": ${filename}`);
+    console.log(`📥 Downloading and optimizing "${artwork.title}": ${filename}`);
     
     try {
-      await downloadImage(artwork.imageUrl, fullImagePath);
-      console.log(`Downloaded: ${filename}`);
+      await downloadAndOptimizeImage(artwork.imageUrl, fullImagePath);
+      console.log(`✅ Complete: ${filename.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`);
     } catch (error) {
-      console.error(`Failed to download ${filename}:`, error);
+      console.error(`❌ Failed to process ${filename}:`, error);
+      // Continue with the original URL as fallback
     }
 
     artworkData.push({
@@ -141,16 +164,16 @@ async function extractProfile(): Promise<ProfileData | null> {
   
   if (profile.imageUrl) {
     const filename = getImageFilename(profile.imageUrl);
-    localImagePath = `/data/images/${filename}`;
+    localImagePath = `/data/images/${filename.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`;
     const fullImagePath = path.join(IMAGES_DIR, filename);
 
-    console.log(`Downloading profile image: ${filename}`);
+    console.log(`📥 Downloading and optimizing profile image: ${filename}`);
     
     try {
-      await downloadImage(profile.imageUrl, fullImagePath);
-      console.log(`Downloaded profile image: ${filename}`);
+      await downloadAndOptimizeImage(profile.imageUrl, fullImagePath);
+      console.log(`✅ Complete: ${filename.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`);
     } catch (error) {
-      console.error(`Failed to download profile image ${filename}:`, error);
+      console.error(`❌ Failed to process profile image ${filename}:`, error);
       localImagePath = null;
     }
   }
