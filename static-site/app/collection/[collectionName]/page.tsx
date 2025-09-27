@@ -13,18 +13,10 @@ export async function generateStaticParams() {
 }
 
 function formatCollectionTitle(collectionName: string): string {
-  // If it already ends with "Collection", return as is
-  if (collectionName.toLowerCase().endsWith('collection')) {
-    return `The ${collectionName}`;
-  }
-  
-  // If it's a year (4 digits), format as "The [Year] Collection"
   if (/^\d{4}$/.test(collectionName)) {
-    return `The ${collectionName} Collection`;
+    return `${collectionName} Collection`;
   }
-  
-  // For other names (like "Sketch"), format as "The [Name] Collection"
-  return `The ${collectionName} Collection`;
+  return `${collectionName} Collection`;
 }
 
 export default async function CollectionPage({ 
