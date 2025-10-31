@@ -16,7 +16,7 @@ function formatCollectionTitle(collectionName: string): string {
   if (/^\d{4}$/.test(collectionName)) {
     return `The ${collectionName} Collection`;
   }
-  return `The${collectionName} Collection`;
+  return `The ${collectionName} Collection`;
 }
 
 export default async function CollectionPage({ 
