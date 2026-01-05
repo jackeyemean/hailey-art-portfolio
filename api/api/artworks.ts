@@ -2,9 +2,6 @@
 import { supabase } from '../lib/supabase';
 import { requireAdminKey } from '../lib/auth';
 import { uploadImageToSupabase } from '../lib/supabase-storage';
-import multer from 'multer';
-
-const upload = multer({ storage: multer.memoryStorage() });
 
 export default async function handler(req: any, res: any) {
   // Set CORS headers
@@ -17,6 +14,9 @@ export default async function handler(req: any, res: any) {
     return res.status(200).end();
   }
 
+  console.log('API Request:', req.method, req.url);
+  console.log('Headers:', req.headers);
+  
   try {
     if (req.method === 'GET') {
       // Get artworks
@@ -40,9 +40,12 @@ export default async function handler(req: any, res: any) {
 
     } else if (req.method === 'POST') {
       // Create artwork - requires admin key
-      requireAdminKey(req, res, () => {});
+      const adminKey = req.headers['x-admin-key'];
+      if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
       
-      // Handle multipart form data
+      console.log('POST body:', req.body);
       const { title, description, collection, medium, dimensions, isArtistPick, isCollectionPick, viewOrder } = req.body;
       
       let imageUrl = '';
@@ -76,7 +79,10 @@ export default async function handler(req: any, res: any) {
 
     } else if (req.method === 'DELETE') {
       // Delete artwork - requires admin key
-      requireAdminKey(req, res, () => {});
+      const adminKey = req.headers['x-admin-key'];
+      if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
       
       const { id } = req.query;
 
@@ -115,6 +121,10 @@ export default async function handler(req: any, res: any) {
 
   } catch (error) {
     console.error('API Error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('Error stack:', error.stack);
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message 
+    });
   }
 }

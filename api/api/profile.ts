@@ -14,6 +14,8 @@ export default async function handler(req: any, res: any) {
     return res.status(200).end();
   }
 
+  console.log('Profile API Request:', req.method, req.url);
+  
   try {
     if (req.method === 'GET') {
       // Get profile
@@ -30,8 +32,12 @@ export default async function handler(req: any, res: any) {
 
     } else if (req.method === 'PUT') {
       // Update profile - requires admin key
-      requireAdminKey(req, res, () => {});
+      const adminKey = req.headers['x-admin-key'];
+      if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
       
+      console.log('PUT body:', req.body);
       const { description } = req.body;
       
       let updateData: any = { description };
@@ -77,7 +83,11 @@ export default async function handler(req: any, res: any) {
     }
 
   } catch (error) {
-    console.error('API Error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('Profile API Error:', error);
+    console.error('Error stack:', error.stack);
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message 
+    });
   }
 }
