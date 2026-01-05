@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     let query = supabase
       .from('Artwork')
       .select('*')
-      .order('viewOrder', { ascending: true, nullsLast: true })
+      .order('viewOrder', { ascending: true, nullsFirst: false })
       .order('createdAt', { ascending: false });
 
     if (collection) {
