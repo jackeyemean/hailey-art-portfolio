@@ -17,17 +17,16 @@ export default async function handler(req: any, res: any) {
   console.log('API Request:', req.method, req.url);
   console.log('Headers:', req.headers);
   
-  // Parse request body if it exists
+  // Parse JSON body
   let body = req.body;
   if (typeof body === 'string') {
     try {
       body = JSON.parse(body);
     } catch (e) {
-      console.error('Failed to parse body:', e);
-      body = {};
+      console.error('Failed to parse JSON body:', e);
+      return res.status(400).json({ error: 'Invalid JSON' });
     }
   }
-  console.log('Parsed body:', body);
   
   try {
     if (req.method === 'GET') {
@@ -57,7 +56,6 @@ export default async function handler(req: any, res: any) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
       
-      console.log('POST body:', body);
       const { title, description, collection, medium, dimensions, isArtistPick, isCollectionPick, viewOrder } = body || {};
       
       let imageUrl = '';
@@ -78,12 +76,16 @@ export default async function handler(req: any, res: any) {
           collection,
           medium,
           dimensions,
-          isArtistPick: isArtistPick === 'true',
-          isCollectionPick: isCollectionPick === 'true',
+          isArtistPick: Boolean(isArtistPick),
+          isCollectionPick: Boolean(isCollectionPick),
           viewOrder: viewOrder ? parseInt(viewOrder) : null
         }])
         .select()
-        .single();
+        .limit(1);
+
+      if (error) throw error;
+
+      const artwork = data && data.length > 0 ? data[0] : null;
 
       if (error) throw error;
 

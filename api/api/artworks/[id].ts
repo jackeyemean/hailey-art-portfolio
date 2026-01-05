@@ -20,16 +20,18 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Artwork ID is required' });
   }
 
-  // Parse request body if it exists
+  // Parse JSON body
   let body = req.body;
   if (typeof body === 'string') {
     try {
       body = JSON.parse(body);
     } catch (e) {
-      console.error('Failed to parse body:', e);
-      body = {};
+      console.error('Failed to parse JSON body:', e);
+      return res.status(400).json({ error: 'Invalid JSON' });
     }
   }
+  
+  console.log('Parsed JSON body:', body);
 
   try {
     if (req.method === 'GET') {
@@ -59,8 +61,8 @@ export default async function handler(req: any, res: any) {
         collection,
         medium,
         dimensions,
-        isArtistPick: isArtistPick === 'true',
-        isCollectionPick: isCollectionPick === 'true',
+        isArtistPick: Boolean(isArtistPick),
+        isCollectionPick: Boolean(isCollectionPick),
         viewOrder: viewOrder ? parseInt(viewOrder) : null
       };
 

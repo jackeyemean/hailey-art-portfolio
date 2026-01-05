@@ -34,13 +34,16 @@ export default async function handler(req: any, res: any) {
       const { data, error } = await supabase
         .from('Profile')
         .select('*')
-        .single();
+        .limit(1);
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+      if (error) {
+        console.error('Profile GET error:', error);
         throw error;
       }
       
-      return res.status(200).json(data || { imageUrl: null, description: null });
+      // Return first profile or default empty profile
+      const profile = data && data.length > 0 ? data[0] : { imageUrl: null, description: null };
+      return res.status(200).json(profile);
 
     } else if (req.method === 'PUT') {
       // Update profile - requires admin key
@@ -61,29 +64,39 @@ export default async function handler(req: any, res: any) {
         updateData.imageUrl = await uploadImageToSupabase(imageBuffer, filename, 'profile');
       }
 
-      // Try to update first, if no rows exist, insert
-      const { data: existingProfile } = await supabase
+      // Try to get existing profile first
+      const { data: existingProfiles } = await supabase
         .from('Profile')
         .select('id')
-        .single();
+        .limit(1);
 
       let data, error;
 
-      if (existingProfile) {
+      if (existingProfiles && existingProfiles.length > 0) {
         // Update existing profile
         ({ data, error } = await supabase
           .from('Profile')
           .update(updateData)
-          .eq('id', existingProfile.id)
+          .eq('id', existingProfiles[0].id)
           .select()
-          .single());
+          .limit(1));
+        
+        // Get the updated data
+        if (!error && data && data.length > 0) {
+          data = data[0];
+        }
       } else {
         // Insert new profile
         ({ data, error } = await supabase
           .from('Profile')
           .insert([updateData])
           .select()
-          .single());
+          .limit(1));
+        
+        // Get the inserted data
+        if (!error && data && data.length > 0) {
+          data = data[0];
+        }
       }
 
       if (error) throw error;

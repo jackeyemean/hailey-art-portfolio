@@ -199,27 +199,60 @@ export default function ProfileForm({ route, navigation }: Props) {
   };
 
   const submitForm = async () => {
-    const form = new FormData();
+    let imageBase64 = null;
+    let filename = null;
+
+    // Convert image to base64 if new image selected
     if (isNewImage && uri) {
-      if (Platform.OS === 'web' && selectedFile) {
-        // For web, use the File object
-        form.append('image', selectedFile);
-      } else {
-        // For mobile, use the uri object
-        form.append('image', {
-          uri,
-          name: uri.split('/').pop()!,
-          type: 'image/jpeg',
-        } as any);
+      try {
+        if (Platform.OS === 'web' && selectedFile) {
+          // For web, convert File to base64
+          const reader = new FileReader();
+          imageBase64 = await new Promise((resolve, reject) => {
+            reader.onload = () => {
+              const result = reader.result as string;
+              resolve(result.split(',')[1]); // Remove data:image/jpeg;base64, prefix
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(selectedFile);
+          });
+          filename = selectedFile.name;
+        } else {
+          // For mobile, convert URI to base64
+          const response = await fetch(uri);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          imageBase64 = await new Promise((resolve, reject) => {
+            reader.onload = () => {
+              const result = reader.result as string;
+              resolve(result.split(',')[1]); // Remove data:image/jpeg;base64, prefix
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+          filename = uri.split('/').pop() || 'profile.jpg';
+        }
+      } catch (error) {
+        console.error('Error converting image to base64:', error);
+        setErrorMessage('Failed to process image');
+        setShowErrorModal(true);
+        return;
       }
     }
-    form.append('description', description.trim());
+
+    const payload = {
+      description: description.trim(),
+      ...(imageBase64 && { image: imageBase64, filename })
+    };
 
     try {
       const res = await fetch(`${API_URL}/profile`, {
         method: 'PUT',
-        headers: { 'x-admin-key': adminKey },
-        body: form,
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey 
+        },
+        body: JSON.stringify(payload),
       });
       
       if (!res.ok) {

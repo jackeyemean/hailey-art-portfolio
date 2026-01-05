@@ -201,28 +201,58 @@ export default function ArtworkForm({ route, navigation }: Props) {
   };
 
   const submitForm = async () => {
-    const form = new FormData();
+    let imageBase64 = null;
+    let filename = null;
+
+    // Convert image to base64 if new image selected
     if (isNewImage && uri) {
-      if (Platform.OS === 'web' && selectedFile) {
-        // For web, use the File object
-        form.append('image', selectedFile);
-      } else {
-        // For mobile, use the uri object
-        form.append('image', {
-          uri,
-          name: uri.split('/').pop()!,
-          type: 'image/jpeg',
-        } as any);
+      try {
+        if (Platform.OS === 'web' && selectedFile) {
+          // For web, convert File to base64
+          const reader = new FileReader();
+          imageBase64 = await new Promise((resolve, reject) => {
+            reader.onload = () => {
+              const result = reader.result as string;
+              resolve(result.split(',')[1]); // Remove data:image/jpeg;base64, prefix
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(selectedFile);
+          });
+          filename = selectedFile.name;
+        } else {
+          // For mobile, convert URI to base64
+          const response = await fetch(uri);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          imageBase64 = await new Promise((resolve, reject) => {
+            reader.onload = () => {
+              const result = reader.result as string;
+              resolve(result.split(',')[1]); // Remove data:image/jpeg;base64, prefix
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+          filename = uri.split('/').pop() || 'image.jpg';
+        }
+      } catch (error) {
+        console.error('Error converting image to base64:', error);
+        setErrorMessage('Failed to process image');
+        setShowErrorModal(true);
+        return;
       }
     }
-    form.append('title', title.trim());
-    form.append('description', description.trim());
-    form.append('collection', collection.trim());
-    form.append('medium', medium.trim());
-    form.append('dimensions', dimensions.trim());
-    form.append('isArtistPick', isArtistPick.toString());
-    form.append('isCollectionPick', isCollectionPick.toString());
-    form.append('viewOrder', viewOrder.trim());
+
+    const payload = {
+      title: title.trim(),
+      description: description.trim(),
+      collection: collection.trim(),
+      medium: medium.trim(),
+      dimensions: dimensions.trim(),
+      isArtistPick,
+      isCollectionPick,
+      viewOrder: viewOrder.trim() ? parseInt(viewOrder.trim()) : null,
+      ...(imageBase64 && { image: imageBase64, filename })
+    };
 
     const url = artworkId
       ? `${API_URL}/artworks/${artworkId}`
@@ -230,8 +260,11 @@ export default function ArtworkForm({ route, navigation }: Props) {
     try {
       const res = await fetch(url, {
         method: artworkId ? 'PUT' : 'POST',
-        headers: { 'x-admin-key': adminKey },
-        body: form,
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey 
+        },
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const text = await res.text();
