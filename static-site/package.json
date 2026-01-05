@@ -11,10 +11,7 @@
   "dependencies": {
     "next": "14.0.0",
     "react": "^18",
-    "react-dom": "^18",
-    "@supabase/supabase-js": "^2.39.0",
-    "multer": "^2.0.2",
-    "sharp": "^0.33.0"
+    "react-dom": "^18"
   },
   "devDependencies": {
     "@types/node": "^20",

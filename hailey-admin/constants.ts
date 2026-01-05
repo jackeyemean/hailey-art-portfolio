@@ -7,7 +7,7 @@ console.log('Environment variables loaded:');
 console.log('ENV_API_URL:', ENV_API_URL);
 console.log('ENV_ADMIN_KEY:', ENV_ADMIN_KEY);
 
-export const API_URL    = ENV_API_URL || 'https://hailey-art.vercel.app/api'
+export const API_URL    = ENV_API_URL || 'https://hailey-art-api.vercel.app/api'
 export const ADMIN_KEY  = ENV_ADMIN_KEY ?? ''
 
 // No longer needed - images are now served directly from Supabase Storage
