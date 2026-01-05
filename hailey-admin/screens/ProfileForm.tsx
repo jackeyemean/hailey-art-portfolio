@@ -17,7 +17,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../types';
-import { API_URL, BUCKET_URL } from '../constants';
+import { API_URL } from '../constants';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProfileForm'>;
 
@@ -161,7 +161,7 @@ export default function ProfileForm({ route, navigation }: Props) {
       if (profile.imageUrl) {
         const existing = profile.imageUrl.startsWith('http')
           ? profile.imageUrl
-          : `${BUCKET_URL}/${profile.imageUrl}`;
+          : profile.imageUrl; // Supabase Storage returns full URLs
         setUri(existing);
       }
       setIsLoading(false);

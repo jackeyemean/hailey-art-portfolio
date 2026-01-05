@@ -18,7 +18,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../types';
-import { API_URL, BUCKET_URL } from '../constants';
+import { API_URL } from '../constants';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Form'>;
 
@@ -165,9 +165,7 @@ export default function ArtworkForm({ route, navigation }: Props) {
         setIsArtistPick(art.isArtistPick || false);
         setIsCollectionPick(art.isCollectionPick || false);
         setViewOrder(art.viewOrder?.toString() || '');
-        const existing = art.imageUrl.startsWith('http')
-          ? art.imageUrl
-          : `${BUCKET_URL}/${art.imageUrl}`;
+        const existing = art.imageUrl; // Supabase Storage returns full URLs
         setUri(existing);
         setIsNewImage(false);
       })
