@@ -21,7 +21,12 @@ export async function GET(req: NextRequest) {
     const { data, error } = await query;
 
     if (error) throw error;
-    return NextResponse.json(data);
+    
+    const response = NextResponse.json(data);
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, x-admin-key');
+    return response;
 
   } catch (error) {
     console.error('API Error:', error);
@@ -95,7 +100,12 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error) throw error;
-    return NextResponse.json(data, { status: 201 });
+    
+    const response = NextResponse.json(data, { status: 201 });
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, x-admin-key');
+    return response;
 
   } catch (error) {
     console.error('API Error:', error);
