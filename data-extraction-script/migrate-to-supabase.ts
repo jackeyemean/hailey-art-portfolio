@@ -101,10 +101,10 @@ async function migrateArtworks(): Promise<void> {
       // Upload image to Supabase Storage
       const newImageUrl = await uploadLocalImageToSupabase(artwork.localImagePath, 'artworks');
 
-      // Insert artwork into Supabase database
+      // Upsert artwork into Supabase database (insert or update if exists)
       const { data, error } = await supabase
         .from('Artwork')
-        .insert({
+        .upsert({
           id: artwork.id,
           title: artwork.title,
           description: artwork.description || null,
@@ -119,7 +119,7 @@ async function migrateArtworks(): Promise<void> {
         });
 
       if (error) {
-        console.error(`❌ Failed to insert artwork "${artwork.title}":`, error);
+        console.error(`❌ Failed to upsert artwork "${artwork.title}":`, error);
         continue;
       }
 
@@ -152,7 +152,7 @@ async function migrateProfile(): Promise<void> {
   }
 
   try {
-    let newImageUrl = null;
+    let newImageUrl: string | null = null;
 
     // Upload profile image if it exists
     if (existingProfile.localImagePath) {
@@ -160,16 +160,17 @@ async function migrateProfile(): Promise<void> {
       newImageUrl = await uploadLocalImageToSupabase(existingProfile.localImagePath, 'profile');
     }
 
-    // Insert profile into Supabase database
+    // Upsert profile into Supabase database (insert or update if exists)
     const { data, error } = await supabase
       .from('Profile')
-      .insert({
+      .upsert({
+        id: 1, // Use a fixed ID for profile since there's only one
         imageUrl: newImageUrl,
         description: existingProfile.description,
       });
 
     if (error) {
-      console.error('❌ Failed to insert profile:', error);
+      console.error('❌ Failed to upsert profile:', error);
       return;
     }
 
