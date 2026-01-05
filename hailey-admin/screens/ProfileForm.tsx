@@ -272,9 +272,8 @@ export default function ProfileForm({ route, navigation }: Props) {
       }
       setIsNewImage(false);
       
-      setSuccessMessage('Profile updated successfully!');
-      setShowSuccessModal(true);
-      // Don't navigate back immediately - let user see the updated form
+      // Navigate back immediately after successful save
+      navigation.goBack();
     } catch (error) {
       setErrorMessage('Unable to save profile.');
       setShowErrorModal(true);

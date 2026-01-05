@@ -67,6 +67,24 @@ export default async function handler(req: any, res: any) {
         imageUrl = await uploadImageToSupabase(imageBuffer, filename);
       }
 
+      // Handle exclusive picks logic
+      if (Boolean(isArtistPick)) {
+        // Clear any existing artist pick
+        await supabase
+          .from('Artwork')
+          .update({ isArtistPick: false })
+          .eq('isArtistPick', true);
+      }
+
+      if (Boolean(isCollectionPick) && collection) {
+        // Clear any existing collection pick in this collection
+        await supabase
+          .from('Artwork')
+          .update({ isCollectionPick: false })
+          .eq('collection', collection)
+          .eq('isCollectionPick', true);
+      }
+
       const { data, error } = await supabase
         .from('Artwork')
         .insert([{

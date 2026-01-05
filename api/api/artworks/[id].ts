@@ -73,16 +73,40 @@ export default async function handler(req: any, res: any) {
         updateData.imageUrl = await uploadImageToSupabase(imageBuffer, filename);
       }
 
+      // Handle exclusive picks logic
+      if (Boolean(isArtistPick)) {
+        // Clear any existing artist pick (except this artwork)
+        await supabase
+          .from('Artwork')
+          .update({ isArtistPick: false })
+          .eq('isArtistPick', true)
+          .neq('id', id);
+      }
+
+      if (Boolean(isCollectionPick) && collection) {
+        // Clear any existing collection pick in this collection (except this artwork)
+        await supabase
+          .from('Artwork')
+          .update({ isCollectionPick: false })
+          .eq('collection', collection)
+          .eq('isCollectionPick', true)
+          .neq('id', id);
+      }
+
       const { data, error } = await supabase
         .from('Artwork')
         .update(updateData)
         .eq('id', id)
         .select()
-        .single();
+        .limit(1);
 
       if (error) throw error;
 
-      return res.status(200).json(data);
+      const artwork = data && data.length > 0 ? data[0] : null;
+
+      if (error) throw error;
+
+      return res.status(200).json(artwork);
 
     } else {
       return res.status(405).json({ error: 'Method not allowed' });
