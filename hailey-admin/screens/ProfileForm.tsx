@@ -272,8 +272,10 @@ export default function ProfileForm({ route, navigation }: Props) {
       }
       setIsNewImage(false);
       
-      // Navigate back immediately after successful save
-      navigation.goBack();
+      // Small delay to ensure state updates are applied before navigation
+      setTimeout(() => {
+        navigation.goBack();
+      }, 50);
     } catch (error) {
       setErrorMessage('Unable to save profile.');
       setShowErrorModal(true);
