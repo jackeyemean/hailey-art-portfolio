@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { requireAdminKey } from '@/lib/auth';
-import { uploadToS3 } from '@/lib/s3-server';
+import { uploadImageToSupabase } from '@/lib/supabase-storage';
 
 export async function GET(req: NextRequest) {
   try {
@@ -47,8 +47,8 @@ export async function POST(req: NextRequest) {
     const bytes = await image.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Upload image to S3
-    const imageUrl = await uploadToS3(buffer, image.name, image.type);
+    // Upload image to Supabase Storage with WebP conversion
+    const imageUrl = await uploadImageToSupabase(buffer, image.name, 'artworks');
 
     // Get form fields
     const title = formData.get('title') as string;

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { requireAdminKey } from '@/lib/auth';
-import { uploadToS3, deleteFromS3 } from '@/lib/s3-server';
+import { uploadImageToSupabase, deleteImageFromSupabase } from '@/lib/supabase-storage';
 
 export async function GET(
   req: NextRequest,
@@ -54,14 +54,13 @@ export async function PUT(
 
     // If new image uploaded, delete old and upload new
     if (image) {
-      // Delete old image from S3
-      const oldKey = new URL(existing.imageUrl).pathname.slice(1);
-      await deleteFromS3(oldKey);
+      // Delete old image from Supabase Storage
+      await deleteImageFromSupabase(existing.imageUrl);
 
-      // Upload new image
+      // Upload new image with WebP conversion
       const bytes = await image.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      imageUrl = await uploadToS3(buffer, image.name, image.type);
+      imageUrl = await uploadImageToSupabase(buffer, image.name, 'artworks');
     }
 
     // Get form fields
@@ -141,9 +140,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Artwork not found' }, { status: 404 });
     }
 
-    // Delete image from S3
-    const key = new URL(artwork.imageUrl).pathname.slice(1);
-    await deleteFromS3(key);
+    // Delete image from Supabase Storage
+    await deleteImageFromSupabase(artwork.imageUrl);
 
     // Delete from database
     const { error: deleteError } = await supabase
@@ -153,12 +151,11 @@ export async function DELETE(
 
     if (deleteError) throw deleteError;
 
-    return NextResponse.json({
-      success: true,
-      id: params.id,
-      deletedImageKey: key,
-      imageUrl: artwork.imageUrl,
-    });
+      return NextResponse.json({
+        success: true,
+        id: params.id,
+        deletedImageUrl: artwork.imageUrl,
+      });
 
   } catch (error) {
     console.error('API Error:', error);

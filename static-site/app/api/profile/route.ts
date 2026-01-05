@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { requireAdminKey } from '@/lib/auth';
-import { uploadToS3 } from '@/lib/s3-server';
+import { uploadImageToSupabase } from '@/lib/supabase-storage';
 
 export async function GET(req: NextRequest) {
   try {
@@ -39,8 +39,7 @@ export async function PUT(req: NextRequest) {
     if (image) {
       const bytes = await image.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      const key = `profile/${Date.now()}-${image.name}`;
-      imageUrl = await uploadToS3(buffer, key, image.type);
+      imageUrl = await uploadImageToSupabase(buffer, image.name, 'profile');
     }
 
     // Get existing profile
