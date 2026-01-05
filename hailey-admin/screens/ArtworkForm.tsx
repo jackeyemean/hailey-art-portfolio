@@ -272,6 +272,24 @@ export default function ArtworkForm({ route, navigation }: Props) {
         setShowErrorModal(true);
         return;
       }
+      
+      // If editing existing artwork, update the form with fresh data
+      if (artworkId) {
+        const updatedArtwork = await res.json();
+        setTitle(updatedArtwork.title || '');
+        setDescription(updatedArtwork.description || '');
+        setCollection(updatedArtwork.collection || '');
+        setMedium(updatedArtwork.medium || '');
+        setDimensions(updatedArtwork.dimensions || '');
+        setIsArtistPick(updatedArtwork.isArtistPick || false);
+        setIsCollectionPick(updatedArtwork.isCollectionPick || false);
+        setViewOrder(updatedArtwork.viewOrder?.toString() || '');
+        if (updatedArtwork.imageUrl) {
+          setUri(updatedArtwork.imageUrl);
+        }
+        setIsNewImage(false);
+      }
+      
       navigation.goBack();
     } catch {
       setErrorMessage('Unable to save artwork.');

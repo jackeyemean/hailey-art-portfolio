@@ -262,9 +262,19 @@ export default function ProfileForm({ route, navigation }: Props) {
         return;
       }
       
+      // Get the updated profile data from the response
+      const updatedProfile = await res.json();
+      
+      // Update the form state with the fresh data
+      setDescription(updatedProfile.description || '');
+      if (updatedProfile.imageUrl) {
+        setUri(updatedProfile.imageUrl);
+      }
+      setIsNewImage(false);
+      
       setSuccessMessage('Profile updated successfully!');
       setShowSuccessModal(true);
-      navigation.goBack();
+      // Don't navigate back immediately - let user see the updated form
     } catch (error) {
       setErrorMessage('Unable to save profile.');
       setShowErrorModal(true);
