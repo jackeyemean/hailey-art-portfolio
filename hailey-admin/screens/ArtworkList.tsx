@@ -139,7 +139,6 @@ export default function ArtworkList({ route, navigation }: Props) {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
 
   // Calculate space needed for sticky button
   const buttonHeight = 48; // Approximate height of the button
@@ -187,38 +186,6 @@ export default function ArtworkList({ route, navigation }: Props) {
     }
   };
 
-  const handleSync = async () => {
-    setIsSyncing(true);
-    try {
-      console.log('Starting sync to static site...');
-      const response = await fetch(`${API_URL}/sync`, {
-        method: 'POST',
-        headers: { 'x-admin-key': adminKey },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Sync failed: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      console.log('Sync result:', result);
-      
-      Alert.alert(
-        'Sync Complete! 🎉',
-        `Successfully synced ${result.stats.artworks} artworks and ${result.stats.collections} collections to the static site.`,
-        [{ text: 'OK' }]
-      );
-    } catch (error) {
-      console.error('Sync failed:', error);
-      Alert.alert(
-        'Sync Failed',
-        'Could not sync to static site. Please try again.',
-        [{ text: 'OK' }]
-      );
-    } finally {
-      setIsSyncing(false);
-    }
-  };
 
   const confirmDelete = (id: string) => {
     setPendingDeleteId(id);
@@ -249,23 +216,12 @@ export default function ArtworkList({ route, navigation }: Props) {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Hailey Admin</Text>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity
-            style={[styles.syncButton, isSyncing && styles.syncButtonDisabled]}
-            onPress={handleSync}
-            disabled={isSyncing}
-          >
-            <Text style={styles.syncButtonText}>
-              {isSyncing ? 'Syncing...' : '🔄 Sync Site'}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.profileButton}
-            onPress={() => navigation.navigate('ProfileForm', { adminKey })}
-          >
-            <Text style={styles.profileButtonText}>Edit Profile</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.profileButton}
+          onPress={() => navigation.navigate('ProfileForm', { adminKey })}
+        >
+          <Text style={styles.profileButtonText}>Edit Profile</Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -357,24 +313,6 @@ const createListStyles = (isDark: boolean) =>
       fontSize: 20,
       fontWeight: 'bold',
       color: isDark ? '#fff' : '#000',
-    },
-    headerButtons: {
-      flexDirection: 'row',
-      gap: 8,
-    },
-    syncButton: {
-      backgroundColor: isDark ? '#0A84FF' : '#007AFF',
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 6,
-    },
-    syncButtonDisabled: {
-      backgroundColor: isDark ? '#444' : '#ccc',
-    },
-    syncButtonText: {
-      color: '#fff',
-      fontSize: 14,
-      fontWeight: '500',
     },
     profileButton: {
       backgroundColor: isDark ? '#333' : '#f0f0f0',
