@@ -1,9 +1,9 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
+// Vercel serverless function
 import { supabase } from '../lib/supabase';
 import { requireAdminKey } from '../lib/auth';
 import { uploadImageToSupabase } from '../lib/supabase-storage';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', 'https://hailey-web-admin.vercel.app');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
