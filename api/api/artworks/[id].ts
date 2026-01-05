@@ -20,6 +20,17 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Artwork ID is required' });
   }
 
+  // Parse request body if it exists
+  let body = req.body;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch (e) {
+      console.error('Failed to parse body:', e);
+      body = {};
+    }
+  }
+
   try {
     if (req.method === 'GET') {
       // Get single artwork
@@ -35,9 +46,12 @@ export default async function handler(req: any, res: any) {
 
     } else if (req.method === 'PUT') {
       // Update artwork - requires admin key
-      requireAdminKey(req, res, () => {});
+      const adminKey = req.headers['x-admin-key'];
+      if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
       
-      const { title, description, collection, medium, dimensions, isArtistPick, isCollectionPick, viewOrder } = req.body;
+      const { title, description, collection, medium, dimensions, isArtistPick, isCollectionPick, viewOrder } = body || {};
       
       let updateData: any = {
         title,
@@ -51,9 +65,9 @@ export default async function handler(req: any, res: any) {
       };
 
       // If there's a new image, upload it
-      if (req.body.image) {
-        const imageBuffer = Buffer.from(req.body.image, 'base64');
-        const filename = req.body.filename || 'artwork.jpg';
+      if (body?.image) {
+        const imageBuffer = Buffer.from(body.image, 'base64');
+        const filename = body.filename || 'artwork.jpg';
         updateData.imageUrl = await uploadImageToSupabase(imageBuffer, filename);
       }
 

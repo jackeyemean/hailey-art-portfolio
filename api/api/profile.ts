@@ -16,6 +16,18 @@ export default async function handler(req: any, res: any) {
 
   console.log('Profile API Request:', req.method, req.url);
   
+  // Parse request body if it exists
+  let body = req.body;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch (e) {
+      console.error('Failed to parse body:', e);
+      body = {};
+    }
+  }
+  console.log('Parsed body:', body);
+  
   try {
     if (req.method === 'GET') {
       // Get profile
@@ -37,15 +49,15 @@ export default async function handler(req: any, res: any) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
       
-      console.log('PUT body:', req.body);
-      const { description } = req.body;
+      console.log('PUT body:', body);
+      const { description } = body || {};
       
       let updateData: any = { description };
 
       // If there's a new image, upload it
-      if (req.body.image) {
-        const imageBuffer = Buffer.from(req.body.image, 'base64');
-        const filename = req.body.filename || 'profile.jpg';
+      if (body?.image) {
+        const imageBuffer = Buffer.from(body.image, 'base64');
+        const filename = body.filename || 'profile.jpg';
         updateData.imageUrl = await uploadImageToSupabase(imageBuffer, filename, 'profile');
       }
 

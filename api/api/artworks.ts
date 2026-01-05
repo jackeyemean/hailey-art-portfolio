@@ -17,6 +17,18 @@ export default async function handler(req: any, res: any) {
   console.log('API Request:', req.method, req.url);
   console.log('Headers:', req.headers);
   
+  // Parse request body if it exists
+  let body = req.body;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch (e) {
+      console.error('Failed to parse body:', e);
+      body = {};
+    }
+  }
+  console.log('Parsed body:', body);
+  
   try {
     if (req.method === 'GET') {
       // Get artworks
@@ -45,15 +57,15 @@ export default async function handler(req: any, res: any) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
       
-      console.log('POST body:', req.body);
-      const { title, description, collection, medium, dimensions, isArtistPick, isCollectionPick, viewOrder } = req.body;
+      console.log('POST body:', body);
+      const { title, description, collection, medium, dimensions, isArtistPick, isCollectionPick, viewOrder } = body || {};
       
       let imageUrl = '';
       
       // If there's an image file, upload it
-      if (req.body.image) {
-        const imageBuffer = Buffer.from(req.body.image, 'base64');
-        const filename = req.body.filename || 'artwork.jpg';
+      if (body?.image) {
+        const imageBuffer = Buffer.from(body.image, 'base64');
+        const filename = body.filename || 'artwork.jpg';
         imageUrl = await uploadImageToSupabase(imageBuffer, filename);
       }
 
