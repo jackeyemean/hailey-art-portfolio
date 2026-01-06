@@ -1,19 +1,5 @@
 [
   {
-    "id": "99727d49-fd2c-40ea-b467-cc0dac9a8e11",
-    "title": "123",
-    "description": "123",
-    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1767587938377-IMG_20250501_111728_609.webp",
-    "localImagePath": "/data/images/1767587938377-IMG_20250501_111728_609.webp",
-    "collection": "132",
-    "medium": "123",
-    "dimensions": "123",
-    "createdAt": "2026-01-05T04:38:58.826611+00:00",
-    "isArtistPick": false,
-    "isCollectionPick": false,
-    "viewOrder": 132
-  },
-  {
     "id": "6074255d-84dd-48f4-955f-5985152a8648",
     "title": "Transient",
     "description": "Collaged from sea life at the Ontario Science Centre.",

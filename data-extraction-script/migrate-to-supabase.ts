@@ -134,6 +134,148 @@ async function migrateArtworks(): Promise<void> {
   console.log(`\n🎉 Artwork migration completed!`);
 }
 
+async function cleanupOrphanedArtworks(staticArtworkIds: string[]): Promise<void> {
+  console.log('\n🧹 Cleaning up orphaned artworks in Supabase...');
+  
+  try {
+    // Get all artwork IDs currently in Supabase
+    const { data: supabaseArtworks, error } = await supabase
+      .from('Artwork')
+      .select('id, imageUrl');
+
+    if (error) {
+      console.error('❌ Failed to fetch Supabase artworks:', error);
+      return;
+    }
+
+    if (!supabaseArtworks || supabaseArtworks.length === 0) {
+      console.log('✅ No artworks in Supabase to clean up');
+      return;
+    }
+
+    // Find orphaned artworks (exist in Supabase but not in static data)
+    const orphanedArtworks = supabaseArtworks.filter(
+      supabaseArt => !staticArtworkIds.includes(supabaseArt.id)
+    );
+
+    if (orphanedArtworks.length === 0) {
+      console.log('✅ No orphaned artworks found in Supabase');
+      return;
+    }
+
+    console.log(`Found ${orphanedArtworks.length} orphaned artworks to remove`);
+
+    // Delete orphaned images from Supabase Storage first
+    for (const orphan of orphanedArtworks) {
+      if (orphan.imageUrl) {
+        try {
+          // Extract filename from Supabase Storage URL
+          const url = new URL(orphan.imageUrl);
+          const pathParts = url.pathname.split('/');
+          const filename = pathParts[pathParts.length - 1];
+          const folder = pathParts[pathParts.length - 2];
+          const fullPath = `${folder}/${filename}`;
+
+          const { error: storageError } = await supabase.storage
+            .from(BUCKET_NAME)
+            .remove([fullPath]);
+
+          if (storageError) {
+            console.error(`❌ Failed to delete image ${fullPath}:`, storageError);
+          } else {
+            console.log(`   🗑️  Deleted orphaned image: ${fullPath}`);
+          }
+        } catch (error) {
+          console.error(`❌ Error processing image URL ${orphan.imageUrl}:`, error);
+        }
+      }
+    }
+
+    // Delete orphaned artwork records from database
+    const orphanedIds = orphanedArtworks.map(art => art.id);
+    const { error: deleteError } = await supabase
+      .from('Artwork')
+      .delete()
+      .in('id', orphanedIds);
+
+    if (deleteError) {
+      console.error('❌ Failed to delete orphaned artworks:', deleteError);
+    } else {
+      console.log(`✅ Deleted ${orphanedArtworks.length} orphaned artworks from Supabase`);
+    }
+
+  } catch (error) {
+    console.error('❌ Error during artwork cleanup:', error);
+  }
+}
+
+async function cleanupOrphanedProfile(): Promise<void> {
+  console.log('\n🧹 Ensuring only one profile row exists...');
+  
+  try {
+    // Get all profiles in Supabase
+    const { data: profiles, error } = await supabase
+      .from('Profile')
+      .select('id, imageUrl');
+
+    if (error) {
+      console.error('❌ Failed to fetch profiles:', error);
+      return;
+    }
+
+    if (!profiles || profiles.length <= 1) {
+      console.log('✅ Profile table is clean (0-1 rows)');
+      return;
+    }
+
+    console.log(`Found ${profiles.length} profile rows, cleaning up extras...`);
+
+    // Keep only the profile with id=1, delete all others
+    const profilesToDelete = profiles.filter(profile => profile.id !== 1);
+    
+    // Delete orphaned profile images from storage
+    for (const profile of profilesToDelete) {
+      if (profile.imageUrl) {
+        try {
+          const url = new URL(profile.imageUrl);
+          const pathParts = url.pathname.split('/');
+          const filename = pathParts[pathParts.length - 1];
+          const folder = pathParts[pathParts.length - 2];
+          const fullPath = `${folder}/${filename}`;
+
+          const { error: storageError } = await supabase.storage
+            .from(BUCKET_NAME)
+            .remove([fullPath]);
+
+          if (storageError) {
+            console.error(`❌ Failed to delete profile image ${fullPath}:`, storageError);
+          } else {
+            console.log(`   🗑️  Deleted orphaned profile image: ${fullPath}`);
+          }
+        } catch (error) {
+          console.error(`❌ Error processing profile image URL:`, error);
+        }
+      }
+    }
+
+    // Delete extra profile rows
+    const idsToDelete = profilesToDelete.map(p => p.id);
+    const { error: deleteError } = await supabase
+      .from('Profile')
+      .delete()
+      .in('id', idsToDelete);
+
+    if (deleteError) {
+      console.error('❌ Failed to delete extra profile rows:', deleteError);
+    } else {
+      console.log(`✅ Deleted ${profilesToDelete.length} extra profile rows`);
+    }
+
+  } catch (error) {
+    console.error('❌ Error during profile cleanup:', error);
+  }
+}
+
 async function migrateProfile(): Promise<void> {
   console.log('\n👤 Migrating profile to Supabase...');
   
@@ -228,14 +370,33 @@ async function main() {
       process.exit(1);
     }
 
+    // Read static data to get IDs for cleanup
+    const artworksPath = path.join(STATIC_DATA_DIR, 'artworks.json');
+    let staticArtworkIds: string[] = [];
+    
+    if (await fs.pathExists(artworksPath)) {
+      const existingArtworks: ExistingArtwork[] = await fs.readJson(artworksPath);
+      staticArtworkIds = existingArtworks.map(art => art.id);
+    }
+
+    // Migrate data first
     await migrateArtworks();
     await migrateProfile();
+    
+    // Then cleanup orphaned data to create exact replica
+    await cleanupOrphanedArtworks(staticArtworkIds);
+    await cleanupOrphanedProfile();
+    
     await verifyMigration();
     
     console.log('\n🎉 Migration completed successfully!');
+    console.log('\n✨ Created exact replica: Supabase now matches static site data');
+    console.log('   • Migrated all static artworks & profile to Supabase');
+    console.log('   • Deleted orphaned artworks & images from Supabase');
+    console.log('   • Ensured only one profile row exists');
     console.log('\n📋 Next steps:');
-    console.log('1. Test your admin app - it should now show all migrated artworks');
-    console.log('2. Use the sync button to regenerate static site data');
+    console.log('1. Test your admin app - it should show the exact same data');
+    console.log('2. Make changes in admin, then run extract-supabase to sync back');
     console.log('3. Deploy the updated static site');
     
   } catch (error) {

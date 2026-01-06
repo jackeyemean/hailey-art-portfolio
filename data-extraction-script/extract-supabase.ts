@@ -134,6 +134,9 @@ async function extractArtworks(): Promise<ArtworkData[]> {
       // Continue with the original URL as fallback
     }
 
+    // Add small delay to prevent rate limiting
+    await new Promise(resolve => setTimeout(resolve, 150));
+
     artworkData.push({
       id: artwork.id,
       title: artwork.title,
@@ -151,6 +154,48 @@ async function extractArtworks(): Promise<ArtworkData[]> {
   }
 
   return artworkData;
+}
+
+async function cleanupOrphanedImages(expectedImages: string[]): Promise<void> {
+  console.log('🧹 Cleaning up orphaned images...');
+  
+  try {
+    // Get all existing image files
+    const existingFiles = await fs.readdir(IMAGES_DIR);
+    const imageFiles = existingFiles.filter(file => 
+      file.toLowerCase().endsWith('.webp') || 
+      file.toLowerCase().endsWith('.jpg') || 
+      file.toLowerCase().endsWith('.jpeg') || 
+      file.toLowerCase().endsWith('.png')
+    );
+
+    let deletedCount = 0;
+
+    for (const file of imageFiles) {
+      // Check if this image is expected (in our current Supabase data)
+      const isExpected = expectedImages.some(expectedFile => {
+        // Extract just the filename from the path
+        const expectedFilename = path.basename(expectedFile);
+        return file === expectedFilename || file === expectedFilename.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+      });
+
+      if (!isExpected) {
+        const filePath = path.join(IMAGES_DIR, file);
+        await fs.remove(filePath);
+        console.log(`   🗑️  Removed orphaned image: ${file}`);
+        deletedCount++;
+      }
+    }
+
+    if (deletedCount > 0) {
+      console.log(`✅ Cleaned up ${deletedCount} orphaned images`);
+    } else {
+      console.log('✅ No orphaned images found');
+    }
+
+  } catch (error) {
+    console.error('❌ Error during image cleanup:', error);
+  }
 }
 
 async function extractProfile(): Promise<ProfileData | null> {
@@ -186,6 +231,9 @@ async function extractProfile(): Promise<ProfileData | null> {
       console.error(`❌ Failed to process profile image ${filename}:`, error);
       localImagePath = null;
     }
+
+    // Add small delay to prevent rate limiting
+    await new Promise(resolve => setTimeout(resolve, 150));
   }
 
   return {
@@ -205,6 +253,19 @@ async function generateStaticData(): Promise<void> {
 
   const artworks = await extractArtworks();
   const profile = await extractProfile();
+
+  // Clean up orphaned images - build list of expected images
+  const expectedImages: string[] = [];
+  artworks.forEach(artwork => {
+    if (artwork.imageUrl) {
+      expectedImages.push(getImageFilename(artwork.imageUrl));
+    }
+  });
+  if (profile?.imageUrl) {
+    expectedImages.push(getImageFilename(profile.imageUrl));
+  }
+  
+  await cleanupOrphanedImages(expectedImages);
 
   const collections = Array.from(
     new Set(artworks.map(art => art.collection))
@@ -243,6 +304,7 @@ async function generateStaticData(): Promise<void> {
   console.log(`   - artist-pick.json`);
   console.log(`   - routes.json`);
   console.log(`   - Downloaded ${artworks.length + (profile?.localImagePath ? 1 : 0)} images`);
+  console.log(`   - Cleaned up orphaned images`);
 }
 
 async function main() {
