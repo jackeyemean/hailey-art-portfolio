@@ -30,19 +30,20 @@ export default async function handler(req: any, res: any) {
   
   try {
     if (req.method === 'GET') {
-      // Get profile
+      // Get the single profile (ID = 1)
       const { data, error } = await supabase
         .from('Profile')
         .select('*')
-        .limit(1);
+        .eq('id', 1)
+        .single();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
         console.error('Profile GET error:', error);
         throw error;
       }
       
-      // Return first profile or default empty profile
-      const profile = data && data.length > 0 ? data[0] : { imageUrl: null, description: null };
+      // Return profile or default empty profile
+      const profile = data || { imageUrl: null, description: null };
       return res.status(200).json(profile);
 
     } else if (req.method === 'PUT') {
@@ -64,40 +65,17 @@ export default async function handler(req: any, res: any) {
         updateData.imageUrl = await uploadImageToSupabase(imageBuffer, filename, 'profile');
       }
 
-      // Try to get existing profile first
-      const { data: existingProfiles } = await supabase
+      // Always use upsert with a fixed ID to ensure only one profile row
+      const PROFILE_ID = 1; // Fixed ID for the single profile row
+      
+      const { data, error } = await supabase
         .from('Profile')
-        .select('id')
-        .limit(1);
-
-      let data, error;
-
-      if (existingProfiles && existingProfiles.length > 0) {
-        // Update existing profile
-        ({ data, error } = await supabase
-          .from('Profile')
-          .update(updateData)
-          .eq('id', existingProfiles[0].id)
-          .select()
-          .limit(1));
-        
-        // Get the updated data
-        if (!error && data && data.length > 0) {
-          data = data[0];
-        }
-      } else {
-        // Insert new profile
-        ({ data, error } = await supabase
-          .from('Profile')
-          .insert([updateData])
-          .select()
-          .limit(1));
-        
-        // Get the inserted data
-        if (!error && data && data.length > 0) {
-          data = data[0];
-        }
-      }
+        .upsert({
+          id: PROFILE_ID,
+          ...updateData
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
