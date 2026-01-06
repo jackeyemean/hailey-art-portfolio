@@ -139,6 +139,7 @@ export default function ArtworkList({ route, navigation }: Props) {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [pendingDeleteTitle, setPendingDeleteTitle] = useState<string>('');
 
   // Calculate space needed for sticky button
   const buttonHeight = 48; // Approximate height of the button
@@ -176,19 +177,33 @@ export default function ArtworkList({ route, navigation }: Props) {
 
   const handleDelete = async (id: string) => {
     try {
-      await fetch(`${API_URL}/artworks/${id}`, {
+      const response = await fetch(`${API_URL}/artworks/${id}`, {
         method: 'DELETE',
         headers: { 'x-admin-key': adminKey },
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Delete failed:', response.status, errorText);
+        setErrorMessage(`Failed to delete artwork: ${errorText || response.status}`);
+        setShowErrorModal(true);
+        return;
+      }
+      
+      // Only update UI if delete was successful
       setData((cur) => cur.filter((a) => a.id !== id));
     } catch (err) {
       console.error('Delete failed:', err);
+      setErrorMessage('Failed to delete artwork. Please try again.');
+      setShowErrorModal(true);
     }
   };
 
 
   const confirmDelete = (id: string) => {
+    const artwork = data.find(art => art.id === id);
     setPendingDeleteId(id);
+    setPendingDeleteTitle(artwork?.title || 'this artwork');
     setShowDeleteModal(true);
   };
 
@@ -196,6 +211,7 @@ export default function ArtworkList({ route, navigation }: Props) {
     if (pendingDeleteId) {
       handleDelete(pendingDeleteId);
       setPendingDeleteId(null);
+      setPendingDeleteTitle('');
     }
     setShowDeleteModal(false);
   };
@@ -204,6 +220,7 @@ export default function ArtworkList({ route, navigation }: Props) {
     setShowDeleteModal(false);
     setShowErrorModal(false);
     setPendingDeleteId(null);
+    setPendingDeleteTitle('');
   };
 
   const handleEdit = (id: string) =>
@@ -273,7 +290,7 @@ export default function ArtworkList({ route, navigation }: Props) {
       <ConfirmationModal
         visible={showDeleteModal}
         title="Confirm Delete"
-        message="Are you sure you want to delete this artwork?"
+        message={`Are you sure you want to delete '${pendingDeleteTitle}'?`}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
         confirmText="Delete"

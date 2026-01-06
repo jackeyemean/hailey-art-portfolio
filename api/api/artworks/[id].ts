@@ -108,6 +108,38 @@ export default async function handler(req: any, res: any) {
 
       return res.status(200).json(artwork);
 
+    } else if (req.method === 'DELETE') {
+      // Delete artwork - requires admin key
+      const adminKey = req.headers['x-admin-key'];
+      if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      // First get the artwork to delete the image
+      const { data: artwork } = await supabase
+        .from('Artwork')
+        .select('imageUrl')
+        .eq('id', id)
+        .single();
+
+      if (artwork?.imageUrl) {
+        try {
+          // Delete image from storage (implement this if needed)
+          // await deleteImageFromSupabase(artwork.imageUrl);
+        } catch (error) {
+          console.error('Error deleting image:', error);
+        }
+      }
+
+      const { error } = await supabase
+        .from('Artwork')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      return res.status(200).json({ message: 'Artwork deleted successfully' });
+
     } else {
       return res.status(405).json({ error: 'Method not allowed' });
     }
