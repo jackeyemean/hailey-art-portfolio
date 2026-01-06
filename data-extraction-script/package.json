@@ -6,7 +6,7 @@
   "scripts": {
     "extract": "ts-node extract.ts",
     "extract-supabase": "ts-node extract-supabase.ts",
-    "migrate": "ts-node migrate-to-supabase.ts",
+    "migrate-to-supabase": "ts-node migrate-to-supabase.ts",
     "build": "tsc",
     "start": "node dist/extract.js"
   },
