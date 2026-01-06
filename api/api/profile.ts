@@ -30,11 +30,11 @@ export default async function handler(req: any, res: any) {
   
   try {
     if (req.method === 'GET') {
-      // Get the single profile (ID = 1)
+      // Get the single profile (there should only be one)
       const { data, error } = await supabase
         .from('Profile')
         .select('*')
-        .eq('id', 1)
+        .limit(1)
         .single();
 
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
@@ -65,17 +65,35 @@ export default async function handler(req: any, res: any) {
         updateData.imageUrl = await uploadImageToSupabase(imageBuffer, filename, 'profile');
       }
 
-      // Always use upsert with a fixed ID to ensure only one profile row
-      const PROFILE_ID = 1; // Fixed ID for the single profile row
-      
-      const { data, error } = await supabase
+      // Check if a profile already exists
+      const { data: existingProfile } = await supabase
         .from('Profile')
-        .upsert({
-          id: PROFILE_ID,
-          ...updateData
-        })
-        .select()
+        .select('id')
+        .limit(1)
         .single();
+
+      let data, error;
+      
+      if (existingProfile) {
+        // Update existing profile
+        const result = await supabase
+          .from('Profile')
+          .update(updateData)
+          .eq('id', existingProfile.id)
+          .select()
+          .single();
+        data = result.data;
+        error = result.error;
+      } else {
+        // Create new profile (UUID will be auto-generated)
+        const result = await supabase
+          .from('Profile')
+          .insert(updateData)
+          .select()
+          .single();
+        data = result.data;
+        error = result.error;
+      }
 
       if (error) throw error;
 

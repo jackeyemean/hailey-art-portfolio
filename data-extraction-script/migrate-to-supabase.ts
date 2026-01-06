@@ -230,8 +230,9 @@ async function cleanupOrphanedProfile(): Promise<void> {
 
     console.log(`Found ${profiles.length} profile rows, cleaning up extras...`);
 
-    // Keep only the profile with id=1, delete all others
-    const profilesToDelete = profiles.filter(profile => profile.id !== 1);
+    // Keep only the first profile, delete all others
+    const firstProfile = profiles[0];
+    const profilesToDelete = profiles.slice(1); // Delete all except the first
     
     // Delete orphaned profile images from storage
     for (const profile of profilesToDelete) {
@@ -302,14 +303,41 @@ async function migrateProfile(): Promise<void> {
       newImageUrl = await uploadLocalImageToSupabase(existingProfile.localImagePath, 'profile');
     }
 
-    // Upsert profile into Supabase database (insert or update if exists)
-    const { data, error } = await supabase
+    // Check if a profile already exists
+    const { data: existingSupabaseProfile } = await supabase
       .from('Profile')
-      .upsert({
-        id: 1, // Use a fixed ID for profile since there's only one
-        imageUrl: newImageUrl,
-        description: existingProfile.description,
-      });
+      .select('id')
+      .limit(1)
+      .single();
+
+    let data, error;
+    
+    if (existingSupabaseProfile) {
+      // Update existing profile (preserve UUID)
+      const result = await supabase
+        .from('Profile')
+        .update({
+          imageUrl: newImageUrl,
+          description: existingProfile.description,
+        })
+        .eq('id', existingSupabaseProfile.id)
+        .select()
+        .single();
+      data = result.data;
+      error = result.error;
+    } else {
+      // Create new profile (UUID auto-generated)
+      const result = await supabase
+        .from('Profile')
+        .insert({
+          imageUrl: newImageUrl,
+          description: existingProfile.description,
+        })
+        .select()
+        .single();
+      data = result.data;
+      error = result.error;
+    }
 
     if (error) {
       console.error('❌ Failed to upsert profile:', error);
