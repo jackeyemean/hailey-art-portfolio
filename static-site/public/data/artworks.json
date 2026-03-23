@@ -429,7 +429,7 @@
   },
   {
     "id": "ee8e71c9-8d91-4ded-9a88-30ba71664f81",
-    "title": "Shrouded",
+    "title": "Passing Through",
     "description": "A corner from a friend's trip to Greece. 5/7 of paintings to cap off December.",
     "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1767656663129-DSCN6831.webp",
     "localImagePath": "/data/images/1767656663129-DSCN6831.webp",
@@ -538,6 +538,34 @@
     "isArtistPick": false,
     "isCollectionPick": false,
     "viewOrder": 15
+  },
+  {
+    "id": "803fab03-d43c-435b-aff7-ad350f437b8f",
+    "title": "Geneva",
+    "description": "From life, 2026",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1774275076908-652761482_1200893132118597_8222215390475965741_n.webp",
+    "localImagePath": "/data/images/1774275076908-652761482_1200893132118597_8222215390475965741_n.webp",
+    "collection": "2026",
+    "medium": "Watercolour on card",
+    "dimensions": "4.1\" x 5.8\"",
+    "createdAt": "2026-03-23T14:11:17.712087+00:00",
+    "isArtistPick": false,
+    "isCollectionPick": false,
+    "viewOrder": 1
+  },
+  {
+    "id": "6e1c8ae7-5f65-47e4-a286-5f03c92235da",
+    "title": "Milan / Galleria Di Vittorio Emanuele",
+    "description": "From life, 2026",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1774275177738-653416479_1363730675512171_2918711692955971552_n.webp",
+    "localImagePath": "/data/images/1774275177738-653416479_1363730675512171_2918711692955971552_n.webp",
+    "collection": "2026",
+    "medium": "Watercolour on card",
+    "dimensions": "4.1\" x 5.8\"",
+    "createdAt": "2026-03-23T14:12:58.507659+00:00",
+    "isArtistPick": false,
+    "isCollectionPick": false,
+    "viewOrder": 2
   },
   {
     "id": "5e7c3b81-646c-43b2-a2b8-926fdd81e13b",
