@@ -540,6 +540,20 @@
     "viewOrder": 15
   },
   {
+    "id": "e0209520-6737-48f5-b068-a795ead4aab4",
+    "title": "Rapperswil",
+    "description": "Alla prima painting of a sunny April day.",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1775745198018-Rapperswil.webp",
+    "localImagePath": "/data/images/1775745198018-Rapperswil.webp",
+    "collection": "2026",
+    "medium": "Acrylic on canvas",
+    "dimensions": "40cm x 40 cm",
+    "createdAt": "2026-04-09T14:33:18.800024+00:00",
+    "isArtistPick": false,
+    "isCollectionPick": false,
+    "viewOrder": 1
+  },
+  {
     "id": "803fab03-d43c-435b-aff7-ad350f437b8f",
     "title": "Geneva",
     "description": "From life, 2026",
@@ -554,6 +568,20 @@
     "viewOrder": 1
   },
   {
+    "id": "1b6ce3c9-772b-49d4-a0ca-ac4a864a2d20",
+    "title": "Three Ponds",
+    "description": "Alla prima (from life) acrylic painting at the cloudy Three Ponds in St. Gallen, February 2026.",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1775745263884-Three%20Ponds.webp",
+    "localImagePath": "/data/images/1775745263884-Three%20Ponds.webp",
+    "collection": "2026",
+    "medium": "Acrylic on Canvas",
+    "dimensions": "20 cm x 20 cm",
+    "createdAt": "2026-04-09T14:34:24.378958+00:00",
+    "isArtistPick": false,
+    "isCollectionPick": false,
+    "viewOrder": 2
+  },
+  {
     "id": "6e1c8ae7-5f65-47e4-a286-5f03c92235da",
     "title": "Milan / Galleria Di Vittorio Emanuele",
     "description": "From life, 2026",
@@ -566,6 +594,20 @@
     "isArtistPick": false,
     "isCollectionPick": false,
     "viewOrder": 2
+  },
+  {
+    "id": "340ecf2b-3f06-4888-8453-8c61b2865810",
+    "title": "Balcony",
+    "description": "Impressionist-inspired painting of a balcony view, February 2026.",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1775745355449-Balcony.webp",
+    "localImagePath": "/data/images/1775745355449-Balcony.webp",
+    "collection": "2026",
+    "medium": "Oil on canvas",
+    "dimensions": "20 cm x 30 cm",
+    "createdAt": "2026-04-09T14:35:56.003082+00:00",
+    "isArtistPick": false,
+    "isCollectionPick": false,
+    "viewOrder": 3
   },
   {
     "id": "5e7c3b81-646c-43b2-a2b8-926fdd81e13b",
