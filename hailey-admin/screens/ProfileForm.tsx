@@ -11,13 +11,13 @@ import {
   Text,
   useColorScheme,
   Modal,
-  Platform,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../types';
 import { API_URL } from '../constants';
+import { prepareImageUpload } from '../utils/prepareImageUpload';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProfileForm'>;
 
@@ -135,7 +135,7 @@ export default function ProfileForm({ route, navigation }: Props) {
   const [description, setDescription] = useState('');
   const [uri, setUri] = useState<string | null>(null);
   const [isNewImage, setIsNewImage] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
@@ -183,55 +183,17 @@ export default function ProfileForm({ route, navigation }: Props) {
       const asset = res.assets[0];
       setUri(asset.uri);
       setIsNewImage(true);
-      
-      // For web, convert the asset to a File object
-      if (Platform.OS === 'web' && asset.uri) {
-        try {
-          const response = await fetch(asset.uri);
-          const blob = await response.blob();
-          const file = new File([blob], asset.fileName || 'image.jpg', { type: asset.mimeType || 'image/jpeg' });
-          setSelectedFile(file);
-        } catch (error) {
-          console.error('Error converting image to file:', error);
-        }
-      }
+      setSelectedAsset(asset);
     }
   };
 
   const submitForm = async () => {
-    let imageBase64 = null;
-    let filename = null;
+    let upload: { image: string; filename: string } | null = null;
 
-    // Convert image to base64 if new image selected
-    if (isNewImage && uri) {
+    // Shrink the image to fit the API's size limit if new image selected
+    if (isNewImage && selectedAsset) {
       try {
-        if (Platform.OS === 'web' && selectedFile) {
-          // For web, convert File to base64
-          const reader = new FileReader();
-          imageBase64 = await new Promise((resolve, reject) => {
-            reader.onload = () => {
-              const result = reader.result as string;
-              resolve(result.split(',')[1]); // Remove data:image/jpeg;base64, prefix
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(selectedFile);
-          });
-          filename = selectedFile.name;
-        } else {
-          // For mobile, convert URI to base64
-          const response = await fetch(uri);
-          const blob = await response.blob();
-          const reader = new FileReader();
-          imageBase64 = await new Promise((resolve, reject) => {
-            reader.onload = () => {
-              const result = reader.result as string;
-              resolve(result.split(',')[1]); // Remove data:image/jpeg;base64, prefix
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          });
-          filename = uri.split('/').pop() || 'profile.jpg';
-        }
+        upload = await prepareImageUpload(selectedAsset, 'profile.jpg');
       } catch (error) {
         console.error('Error converting image to base64:', error);
         setErrorMessage('Failed to process image');
@@ -242,7 +204,7 @@ export default function ProfileForm({ route, navigation }: Props) {
 
     const payload = {
       description: description.trim(),
-      ...(imageBase64 && { image: imageBase64, filename })
+      ...upload
     };
 
     try {
