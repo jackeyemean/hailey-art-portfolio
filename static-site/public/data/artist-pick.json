@@ -1,14 +1,14 @@
 {
-  "id": "31eb5e4b-5b2d-4bc2-ba7b-6d038627d645",
-  "title": "Central",
-  "description": "An homage to ordered chaos. Central, Hong Kong.",
-  "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1767656421412-DSCN6730.webp",
-  "localImagePath": "/data/images/1767656421412-DSCN6730.webp",
-  "collection": "2025",
+  "id": "577ffb12-8a7e-4860-b3fa-dfe962e63e06",
+  "title": "Autumn in Central Park",
+  "description": "A brisk autumn walk on the Upper East Side in Manhattan, NYC. October 2026",
+  "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1794008723482-Autumn%20in%20Central%20Park.webp",
+  "localImagePath": "/data/images/1794008723482-Autumn%20in%20Central%20Park.webp",
+  "collection": "2026",
   "medium": "Acrylic on canvas",
-  "dimensions": "40\" x 40\"",
-  "createdAt": "2025-08-11T09:00:19.92+00:00",
+  "dimensions": "5\" x 7\"",
+  "createdAt": "2026-11-06T23:45:24.009957+00:00",
   "isArtistPick": true,
-  "isCollectionPick": false,
-  "viewOrder": 4
+  "isCollectionPick": true,
+  "viewOrder": 3
 }
