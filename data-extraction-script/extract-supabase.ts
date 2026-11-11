@@ -44,12 +44,25 @@ interface ProfileData {
   updatedAt?: string;
 }
 
+// Retries transient network failures (connection resets, DNS hiccups) before giving up
+async function downloadWithRetry(url: string, outputPath: string, attempts = 3): Promise<void> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await downloadAndOptimizeImage(url, outputPath);
+    } catch (error) {
+      if (attempt >= attempts) throw error;
+      console.log(`   ⚠️  Attempt ${attempt} failed (${(error as Error).message}), retrying...`);
+      await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
+    }
+  }
+}
+
 async function downloadAndOptimizeImage(url: string, outputPath: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const protocol = url.startsWith('https:') ? https : http;
     const chunks: Buffer[] = [];
-    
-    protocol.get(url, (response) => {
+
+    const request = protocol.get(url, (response) => {
       if (response.statusCode !== 200) {
         reject(new Error(`Failed to download image: ${response.statusCode}`));
         return;
@@ -91,14 +104,17 @@ async function downloadAndOptimizeImage(url: string, outputPath: string): Promis
     }).on('error', (err) => {
       reject(err);
     });
+    request.setTimeout(30000, () => request.destroy(new Error('Download timed out')));
   });
 }
 
 function getImageFilename(imageUrl: string): string {
-  // Extract filename from Supabase Storage URL
+  // Extract filename from Supabase Storage URL. The URL is percent-encoded ("Three%20Ponds"),
+  // so decode it and keep only URL-safe characters; otherwise the file is saved with a literal
+  // "%20" in its name, which local servers can't serve.
   const urlParts = imageUrl.split('/');
-  const filename = urlParts[urlParts.length - 1];
-  return filename;
+  const filename = decodeURIComponent(urlParts[urlParts.length - 1]);
+  return filename.replace(/[^A-Za-z0-9._-]+/g, '-');
 }
 
 async function extractArtworks(): Promise<ArtworkData[]> {
@@ -118,6 +134,7 @@ async function extractArtworks(): Promise<ArtworkData[]> {
   console.log(`Found ${artworks.length} artworks`);
 
   const artworkData: ArtworkData[] = [];
+  const failures: string[] = [];
 
   for (const artwork of artworks) {
     const filename = getImageFilename(artwork.imageUrl);
@@ -127,11 +144,11 @@ async function extractArtworks(): Promise<ArtworkData[]> {
     console.log(`📥 Downloading and optimizing "${artwork.title}": ${filename}`);
     
     try {
-      await downloadAndOptimizeImage(artwork.imageUrl, fullImagePath);
+      await downloadWithRetry(artwork.imageUrl, fullImagePath);
       console.log(`✅ Complete: ${filename.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`);
     } catch (error) {
       console.error(`❌ Failed to process ${filename}:`, error);
-      // Continue with the original URL as fallback
+      failures.push(`"${artwork.title}" (${filename})`);
     }
 
     // Add small delay to prevent rate limiting
@@ -149,8 +166,13 @@ async function extractArtworks(): Promise<ArtworkData[]> {
       createdAt: artwork.createdAt,
       isArtistPick: artwork.isArtistPick,
       isCollectionPick: artwork.isCollectionPick,
-      viewOrder: artwork.viewOrder || undefined,
+      viewOrder: artwork.viewOrder ?? undefined,
     });
+  }
+
+  // Stop before any data file is written, so a flaky connection can't publish broken image paths
+  if (failures.length > 0) {
+    throw new Error(`${failures.length} image(s) failed to download, no files were updated. Re-run the script.\n  ${failures.join('\n  ')}`);
   }
 
   return artworkData;
@@ -225,11 +247,10 @@ async function extractProfile(): Promise<ProfileData | null> {
     console.log(`📥 Downloading and optimizing profile image: ${filename}`);
     
     try {
-      await downloadAndOptimizeImage(profile.imageUrl, fullImagePath);
+      await downloadWithRetry(profile.imageUrl, fullImagePath);
       console.log(`✅ Complete: ${filename.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`);
     } catch (error) {
-      console.error(`❌ Failed to process profile image ${filename}:`, error);
-      localImagePath = null;
+      throw new Error(`Profile image ${filename} failed to download, no files were updated. Re-run the script. (${(error as Error).message})`);
     }
 
     // Add small delay to prevent rate limiting
