@@ -1,7 +1,7 @@
 // Vercel serverless function
 import { supabase } from '../lib/supabase';
-import { requireAdminKey } from '../lib/auth';
 import { uploadImageToSupabase } from '../lib/supabase-storage';
+import { parseViewOrder } from '../lib/view-order';
 
 export default async function handler(req: any, res: any) {
   // Set CORS headers
@@ -15,8 +15,7 @@ export default async function handler(req: any, res: any) {
   }
 
   console.log('API Request:', req.method, req.url);
-  console.log('Headers:', req.headers);
-  
+
   // Parse JSON body
   let body = req.body;
   if (typeof body === 'string') {
@@ -96,7 +95,7 @@ export default async function handler(req: any, res: any) {
           dimensions,
           isArtistPick: Boolean(isArtistPick),
           isCollectionPick: Boolean(isCollectionPick),
-          viewOrder: viewOrder ? parseInt(viewOrder) : null
+          viewOrder: parseViewOrder(viewOrder)
         }])
         .select()
         .limit(1);
@@ -104,8 +103,6 @@ export default async function handler(req: any, res: any) {
       if (error) throw error;
 
       const artwork = data && data.length > 0 ? data[0] : null;
-
-      if (error) throw error;
 
       return res.status(201).json(artwork);
 

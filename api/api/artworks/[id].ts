@@ -1,7 +1,7 @@
 // Vercel serverless function
 import { supabase } from '../../lib/supabase';
-import { requireAdminKey } from '../../lib/auth';
-import { uploadImageToSupabase } from '../../lib/supabase-storage';
+import { uploadImageToSupabase, deleteImageFromSupabase } from '../../lib/supabase-storage';
+import { parseViewOrder } from '../../lib/view-order';
 
 export default async function handler(req: any, res: any) {
   // Set CORS headers
@@ -30,8 +30,8 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Invalid JSON' });
     }
   }
-  
-  console.log('Parsed JSON body:', body);
+
+  console.log('API Request:', req.method, req.url);
 
   try {
     if (req.method === 'GET') {
@@ -42,6 +42,9 @@ export default async function handler(req: any, res: any) {
         .eq('id', id)
         .single();
 
+      if (error?.code === 'PGRST116') { // no rows returned
+        return res.status(404).json({ error: 'Artwork not found' });
+      }
       if (error) throw error;
       
       return res.status(200).json(data);
@@ -63,11 +66,19 @@ export default async function handler(req: any, res: any) {
         dimensions,
         isArtistPick: Boolean(isArtistPick),
         isCollectionPick: Boolean(isCollectionPick),
-        viewOrder: viewOrder ? parseInt(viewOrder) : null
+        viewOrder: parseViewOrder(viewOrder)
       };
 
-      // If there's a new image, upload it
+      // If there's a new image, remember the old one so it can be removed after a successful update
+      let previousImageUrl: string | null = null;
       if (body?.image) {
+        const { data: existing } = await supabase
+          .from('Artwork')
+          .select('imageUrl')
+          .eq('id', id)
+          .single();
+        previousImageUrl = existing?.imageUrl || null;
+
         const imageBuffer = Buffer.from(body.image, 'base64');
         const filename = body.filename || 'artwork.jpg';
         updateData.imageUrl = await uploadImageToSupabase(imageBuffer, filename);
@@ -104,7 +115,14 @@ export default async function handler(req: any, res: any) {
 
       const artwork = data && data.length > 0 ? data[0] : null;
 
-      if (error) throw error;
+      // The replaced image is no longer used; failing to remove it shouldn't fail the update
+      if (artwork && previousImageUrl && previousImageUrl !== artwork.imageUrl) {
+        try {
+          await deleteImageFromSupabase(previousImageUrl);
+        } catch (error) {
+          console.error('Error deleting replaced image:', error);
+        }
+      }
 
       return res.status(200).json(artwork);
 
@@ -115,21 +133,12 @@ export default async function handler(req: any, res: any) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
 
-      // First get the artwork to delete the image
+      // First get the artwork's image so it can be removed once the row is gone
       const { data: artwork } = await supabase
         .from('Artwork')
         .select('imageUrl')
         .eq('id', id)
         .single();
-
-      if (artwork?.imageUrl) {
-        try {
-          // Delete image from storage (implement this if needed)
-          // await deleteImageFromSupabase(artwork.imageUrl);
-        } catch (error) {
-          console.error('Error deleting image:', error);
-        }
-      }
 
       const { error } = await supabase
         .from('Artwork')
@@ -137,6 +146,15 @@ export default async function handler(req: any, res: any) {
         .eq('id', id);
 
       if (error) throw error;
+
+      // Failing to remove the image shouldn't fail the delete; it only leaves an unused file
+      if (artwork?.imageUrl) {
+        try {
+          await deleteImageFromSupabase(artwork.imageUrl);
+        } catch (error) {
+          console.error('Error deleting image:', error);
+        }
+      }
 
       return res.status(200).json({ message: 'Artwork deleted successfully' });
 

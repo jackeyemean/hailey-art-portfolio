@@ -1,7 +1,6 @@
 // Vercel serverless function
 import { supabase } from '../lib/supabase';
-import { requireAdminKey } from '../lib/auth';
-import { uploadImageToSupabase } from '../lib/supabase-storage';
+import { uploadImageToSupabase, deleteImageFromSupabase } from '../lib/supabase-storage';
 
 export default async function handler(req: any, res: any) {
   // Set CORS headers
@@ -26,8 +25,7 @@ export default async function handler(req: any, res: any) {
       body = {};
     }
   }
-  console.log('Parsed body:', body);
-  
+
   try {
     if (req.method === 'GET') {
       // Get the single profile (there should only be one)
@@ -53,7 +51,6 @@ export default async function handler(req: any, res: any) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
       
-      console.log('PUT body:', body);
       const { description } = body || {};
       
       let updateData: any = { description };
@@ -68,7 +65,7 @@ export default async function handler(req: any, res: any) {
       // Check if a profile already exists
       const { data: existingProfile } = await supabase
         .from('Profile')
-        .select('id')
+        .select('id, imageUrl')
         .limit(1)
         .single();
 
@@ -96,6 +93,16 @@ export default async function handler(req: any, res: any) {
       }
 
       if (error) throw error;
+
+      // The replaced portrait is no longer used; failing to remove it shouldn't fail the update
+      const previousImageUrl = existingProfile?.imageUrl;
+      if (updateData.imageUrl && previousImageUrl && previousImageUrl !== updateData.imageUrl) {
+        try {
+          await deleteImageFromSupabase(previousImageUrl);
+        } catch (error) {
+          console.error('Error deleting replaced profile image:', error);
+        }
+      }
 
       return res.status(200).json(data);
 

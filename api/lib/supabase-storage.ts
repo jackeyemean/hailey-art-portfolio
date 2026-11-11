@@ -60,9 +60,10 @@ export async function uploadImageToSupabase(
 
 export async function deleteImageFromSupabase(imageUrl: string): Promise<void> {
   try {
-    // Extract filename from URL
+    // Public URLs look like .../object/public/artwork-images/artworks/123-Name.webp and are
+    // percent-encoded, so decode to get the real storage path ("123-Name With Spaces.webp")
     const url = new URL(imageUrl);
-    const pathParts = url.pathname.split('/');
+    const pathParts = decodeURIComponent(url.pathname).split('/');
     const filename = pathParts[pathParts.length - 1];
     const folder = pathParts[pathParts.length - 2];
     const fullPath = `${folder}/${filename}`;
