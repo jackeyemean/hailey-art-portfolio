@@ -1,14 +1,14 @@
 {
-  "id": "577ffb12-8a7e-4860-b3fa-dfe962e63e06",
-  "title": "Autumn in Central Park",
-  "description": "A brisk autumn walk on the Upper East Side in Manhattan, NYC. October 2026",
-  "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1794008723482-Autumn%20in%20Central%20Park.webp",
-  "localImagePath": "/data/images/1794008723482-Autumn%20in%20Central%20Park.webp",
+  "id": "2f29ade9-81e3-4e56-bd3a-07b05dcd81d3",
+  "title": "St. Gallen Marktplatz",
+  "description": "This painting was started in St. Gallen, Switzerland, on the bench in the city centre (Marktplatz). It went through multiple rounds of painting from plein air (from life), before almost being abandoned in Switzerland. It was brought back to Canada and finalized in August 2026.",
+  "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1794370218073-St.%20Gallen%20Marktplatz.webp",
+  "localImagePath": "/data/images/1794370218073-St.%20Gallen%20Marktplatz.webp",
   "collection": "2026",
   "medium": "Acrylic on canvas",
-  "dimensions": "5\" x 7\"",
-  "createdAt": "2026-11-06T23:45:24.009957+00:00",
+  "dimensions": "15.5\" x 15.5\"",
+  "createdAt": "2026-11-11T04:10:18.445257+00:00",
   "isArtistPick": true,
-  "isCollectionPick": true,
-  "viewOrder": 3
+  "isCollectionPick": false,
+  "viewOrder": 1
 }
