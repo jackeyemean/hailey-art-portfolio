@@ -18,116 +18,10 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../types';
 import { API_URL } from '../constants';
+import ConfirmationModal from '../components/ConfirmationModal';
 import { prepareImageUpload } from '../utils/prepareImageUpload';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Form'>;
-
-// Custom confirmation modal for web compatibility
-const ConfirmationModal = ({ 
-  visible, 
-  title, 
-  message, 
-  onConfirm, 
-  onCancel, 
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
-  isDestructive = false 
-}: {
-  visible: boolean;
-  title: string;
-  message: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-  confirmText?: string;
-  cancelText?: string;
-  isDestructive?: boolean;
-}) => {
-  const isDark = useColorScheme() === 'dark';
-  
-  const modalStyles = StyleSheet.create({
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    modalContent: {
-      margin: 20,
-      borderRadius: 12,
-      padding: 24,
-      minWidth: 300,
-      maxWidth: 400,
-    },
-    modalTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      marginBottom: 12,
-    },
-    modalMessage: {
-      fontSize: 16,
-      marginBottom: 24,
-      lineHeight: 22,
-    },
-    modalButtons: {
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-      gap: 12,
-    },
-    modalButton: {
-      paddingVertical: 8,
-      paddingHorizontal: 16,
-      borderRadius: 6,
-      minWidth: 60,
-      alignItems: 'center',
-    },
-    modalButtonSecondary: {
-      backgroundColor: 'transparent',
-    },
-    modalButtonPrimary: {
-      backgroundColor: '#007AFF',
-    },
-    modalButtonText: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: '#fff',
-    },
-  });
-  
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-    >
-      <View style={modalStyles.modalOverlay}>
-        <View style={[modalStyles.modalContent, { backgroundColor: isDark ? '#1E1E1E' : '#fff' }]}>
-          <Text style={[modalStyles.modalTitle, { color: isDark ? '#fff' : '#000' }]}>{title}</Text>
-          <Text style={[modalStyles.modalMessage, { color: isDark ? '#ccc' : '#666' }]}>{message}</Text>
-          <View style={modalStyles.modalButtons}>
-            <TouchableOpacity 
-              style={[modalStyles.modalButton, modalStyles.modalButtonSecondary]} 
-              onPress={onCancel}
-            >
-              <Text style={[modalStyles.modalButtonText, { color: isDark ? '#0A84FF' : '#007AFF' }]}>
-                {cancelText}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[
-                modalStyles.modalButton, 
-                modalStyles.modalButtonPrimary,
-                isDestructive && { backgroundColor: '#FF3B30' }
-              ]} 
-              onPress={onConfirm}
-            >
-              <Text style={modalStyles.modalButtonText}>{confirmText}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function ArtworkForm({ route, navigation }: Props) {
   const isDark = useColorScheme() === 'dark';
@@ -153,6 +47,8 @@ export default function ArtworkForm({ route, navigation }: Props) {
   // React state updates aren't applied synchronously, so a ref backs the guard itself;
   // isSaving only drives the button's disabled look and label.
   const savingRef = useRef(false);
+  const checkingRef = useRef(false);
+  const [duplicateTitle, setDuplicateTitle] = useState<string | null>(null);
 
   useEffect(() => {
     if (!artworkId) return;
@@ -182,7 +78,7 @@ export default function ArtworkForm({ route, navigation }: Props) {
 
   const pickImage = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       quality: 0.7,
     });
     if (!res.canceled && res.assets?.length) {
@@ -274,8 +170,30 @@ export default function ArtworkForm({ route, navigation }: Props) {
     }
   };
 
-  const handleSubmit = () => {
-    if (savingRef.current) return;
+  // Returns the title of an existing artwork that looks like the one being created (same title,
+  // or a photo uploaded from the same original file), or null. Paintings have been re-added by
+  // mistake under a new write-up before, so creating one asks for confirmation first.
+  const findPossibleDuplicate = async (): Promise<string | null> => {
+    try {
+      const res = await fetch(`${API_URL}/artworks`);
+      const artworks: { title: string; imageUrl: string }[] = await res.json();
+      const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const stripExt = (s: string) => s.replace(/\.[^.]+$/, '');
+      const newTitle = norm(title);
+      const newFile = selectedAsset?.fileName ? norm(stripExt(selectedAsset.fileName)) : '';
+      const match = artworks.find((art) => {
+        // Stored names look like "1794370855712-DSCN0734.webp": upload timestamp(s), then the original name
+        const original = stripExt(decodeURIComponent(art.imageUrl.split('/').pop() || '')).replace(/^(\d+-)+/, '');
+        return norm(art.title) === newTitle || (newFile !== '' && norm(original) === newFile);
+      });
+      return match ? match.title : null;
+    } catch {
+      return null; // a failed check shouldn't block saving
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (savingRef.current || checkingRef.current) return;
     if (!title.trim()) {
       setErrorMessage('Please enter a title.');
       setShowErrorModal(true);
@@ -289,6 +207,14 @@ export default function ArtworkForm({ route, navigation }: Props) {
     if (artworkId) {
       setPendingAction(() => submitForm);
       setShowConfirmModal(true);
+      return;
+    }
+    checkingRef.current = true;
+    const duplicate = await findPossibleDuplicate();
+    checkingRef.current = false;
+    if (duplicate) {
+      setDuplicateTitle(duplicate);
+      setPendingAction(() => submitForm);
     } else {
       submitForm();
     }
@@ -302,6 +228,7 @@ export default function ArtworkForm({ route, navigation }: Props) {
   const handleConfirm = () => {
     setShowConfirmModal(false);
     setShowDiscardModal(false);
+    setDuplicateTitle(null);
     if (pendingAction) {
       pendingAction();
       setPendingAction(null);
@@ -312,6 +239,7 @@ export default function ArtworkForm({ route, navigation }: Props) {
     setShowConfirmModal(false);
     setShowDiscardModal(false);
     setShowErrorModal(false);
+    setDuplicateTitle(null);
     setPendingAction(null);
   };
 
@@ -477,6 +405,15 @@ export default function ArtworkForm({ route, navigation }: Props) {
         onConfirm={handleConfirm}
         onCancel={handleCancel}
         confirmText="Update"
+        cancelText="Cancel"
+      />
+      <ConfirmationModal
+        visible={duplicateTitle !== null}
+        title="Possible duplicate"
+        message={`"${duplicateTitle}" is already on the site with the same title or photo. Create this artwork anyway?`}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+        confirmText="Create anyway"
         cancelText="Cancel"
       />
       <ConfirmationModal
