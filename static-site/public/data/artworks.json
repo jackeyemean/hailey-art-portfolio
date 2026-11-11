@@ -624,20 +624,6 @@
     "viewOrder": 3
   },
   {
-    "id": "71df5c57-58ce-4eb7-8408-a2b6f33de293",
-    "title": "Autumn Weekend",
-    "description": "Fall foliage in late autumn. Plein air in Markham, Ontario - October 2026.",
-    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1794007770730-DSCN0734.webp",
-    "localImagePath": "/data/images/1794007770730-DSCN0734.webp",
-    "collection": "2026",
-    "medium": "Acrylic on canvas",
-    "dimensions": "11\" x 14\"",
-    "createdAt": "2026-11-06T23:29:31.489975+00:00",
-    "isArtistPick": false,
-    "isCollectionPick": false,
-    "viewOrder": 3
-  },
-  {
     "id": "340ecf2b-3f06-4888-8453-8c61b2865810",
     "title": "Seasons on my Balcony",
     "description": "Impressionist-inspired painting of my balcony view in St. Gallen, Switzerland, painted over February to March of my exchange semester, changing as the weather warmed up. Plein air.",
@@ -734,20 +720,6 @@
     "isArtistPick": false,
     "isCollectionPick": false,
     "viewOrder": 9
-  },
-  {
-    "id": "55619f22-f0d8-4482-8f0f-eedaea5bc8ca",
-    "title": "Ecosystem",
-    "description": "A local creek in Southern Ontario. Painted plein air on an October weekend and finished in studio. October 2026",
-    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1794071310679-Local%20Creek.webp",
-    "localImagePath": "/data/images/1794071310679-Local%20Creek.webp",
-    "collection": "2026",
-    "medium": "Acrylic on canvas",
-    "dimensions": "11\" x 14\"",
-    "createdAt": "2026-11-07T17:08:31.145034+00:00",
-    "isArtistPick": false,
-    "isCollectionPick": false,
-    "viewOrder": 12
   },
   {
     "id": "3e4a018b-e031-461e-a625-e1a5ebff9e42",
