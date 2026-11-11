@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { fetchArtworks, getAllCollectionNames } from '@/lib/api';
+import { fetchArtworks, getAllCollectionNames, compareByViewOrder } from '@/lib/api';
 import { Artwork } from '@/types/artwork';
 import NavigationTracker from '@/components/NavigationTracker';
 
@@ -51,25 +51,7 @@ export default async function CollectionPage({
   const decodedCollectionName = decodeURIComponent(params.collectionName);
   const collectionArtworks = artworks
     .filter(art => art.collection === decodedCollectionName)
-    .sort((a, b) => {
-      // Sort by viewOrder first (ascending), then by createdAt for those without viewOrder (descending - newest first)
-      const aViewOrder = a.viewOrder !== undefined && a.viewOrder !== null ? a.viewOrder : null;
-      const bViewOrder = b.viewOrder !== undefined && b.viewOrder !== null ? b.viewOrder : null;
-      
-      if (aViewOrder !== null && bViewOrder !== null) {
-        return aViewOrder - bViewOrder;
-      }
-      
-      if (aViewOrder !== null && bViewOrder === null) {
-        return -1;
-      }
-      if (aViewOrder === null && bViewOrder !== null) {
-        return 1;
-      }
-      
-      // For artworks without viewOrder, sort by createdAt in descending order (newest first)
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+    .sort(compareByViewOrder);
   const formattedTitle = formatCollectionTitle(decodedCollectionName);
 
   return (

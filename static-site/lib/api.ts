@@ -11,6 +11,18 @@ function loadJsonFile<T>(filename: string): T {
   return JSON.parse(fileContents);
 }
 
+// Order within a collection: artworks with a View Order first (lowest first),
+// then those without one, newest first
+export function compareByViewOrder(a: Artwork, b: Artwork): number {
+  const aViewOrder = a.viewOrder ?? null;
+  const bViewOrder = b.viewOrder ?? null;
+
+  if (aViewOrder !== null && bViewOrder !== null) return aViewOrder - bViewOrder;
+  if (aViewOrder !== null) return -1;
+  if (bViewOrder !== null) return 1;
+  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+}
+
 export async function fetchArtworks(collection?: string): Promise<Artwork[]> {
   const artworks = loadJsonFile<Artwork[]>('artworks.json');
   

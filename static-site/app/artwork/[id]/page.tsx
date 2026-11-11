@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { fetchArtworks, getAllArtworkIds } from '@/lib/api';
+import { fetchArtworks, getAllArtworkIds, compareByViewOrder } from '@/lib/api';
 import { Artwork } from '@/types/artwork';
 import BackButton from '@/components/BackButton';
 
@@ -42,15 +42,7 @@ export default async function ArtworkPage({
 
   // Sort each collection's artworks
   artworksByCollection.forEach(collectionArtworks => {
-    collectionArtworks.sort((a, b) => {
-      const aViewOrder = a.viewOrder ?? null;
-      const bViewOrder = b.viewOrder ?? null;
-      
-      if (aViewOrder !== null && bViewOrder !== null) return aViewOrder - bViewOrder;
-      if (aViewOrder !== null) return -1;
-      if (bViewOrder !== null) return 1;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+    collectionArtworks.sort(compareByViewOrder);
   });
 
   // Sort collections and flatten
