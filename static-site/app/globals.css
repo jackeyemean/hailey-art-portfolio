@@ -169,17 +169,39 @@ html {
 
 /* Mobile padding for artist pick section - removed gap to use consistent margin classes */
 
-.artwork-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+/* Staggered columns: each image keeps its own aspect ratio instead of being
+   cropped into a uniform cell. 2 columns on phones, 3 from 640px up. */
+.artwork-columns {
+  display: flex;
   gap: 12px;
   margin-top: 12px;
   width: 100%;
 }
 
+.artwork-columns-desktop {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .artwork-columns-mobile {
+    display: none;
+  }
+
+  .artwork-columns-desktop {
+    display: flex;
+  }
+}
+
+.artwork-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .artwork-card {
   background-color: #000000;
-  aspect-ratio: 386/600;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease;
@@ -190,10 +212,9 @@ html {
 }
 
 .artwork-card img {
-  aspect-ratio: 200/475;
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
 }
 
 .social-icons {

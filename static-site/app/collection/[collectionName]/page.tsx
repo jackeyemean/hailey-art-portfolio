@@ -12,6 +12,29 @@ export async function generateStaticParams() {
   }));
 }
 
+// Deals artworks into columns left to right (1, 2, 3 across the top row, then 4, 5, 6),
+// so View Order reads across the page while each image keeps its own proportions.
+function ArtworkColumns({ artworks, count, className }: { artworks: Artwork[]; count: number; className: string }) {
+  const columns: Artwork[][] = Array.from({ length: count }, () => []);
+  artworks.forEach((artwork, i) => columns[i % count].push(artwork));
+
+  return (
+    <div className={className}>
+      {columns.map((column, i) => (
+        <div key={i} className="artwork-column">
+          {column.map((artwork) => (
+            <Link key={artwork.id} href={`/artwork/${artwork.id}`}>
+              <div className="artwork-card">
+                <img src={artwork.localImagePath || artwork.imageUrl} alt={artwork.title} loading="lazy" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function formatCollectionTitle(collectionName: string): string {
   if (/^\d{4}$/.test(collectionName)) {
     return `The ${collectionName} Collection`;
@@ -66,29 +89,17 @@ export default async function CollectionPage({
             </h1>
           </div>
           
-          <div className="artwork-grid">
-            {collectionArtworks.length > 0 ? (
-              collectionArtworks.map((artwork) => {
-                // Use local image path if available
-                const imageSrc = artwork.localImagePath || artwork.imageUrl;
-                return (
-                  <Link key={artwork.id} href={`/artwork/${artwork.id}`}>
-                    <div className="artwork-card">
-                      <img 
-                        src={imageSrc} 
-                        alt={artwork.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </Link>
-                );
-              })
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-[#000000]">No artworks found in this collection</p>
-              </div>
-            )}
-          </div>
+          {collectionArtworks.length > 0 ? (
+            <>
+              {/* One layout per breakpoint; CSS shows exactly one of them */}
+              <ArtworkColumns artworks={collectionArtworks} count={2} className="artwork-columns artwork-columns-mobile" />
+              <ArtworkColumns artworks={collectionArtworks} count={3} className="artwork-columns artwork-columns-desktop" />
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-[#000000]">No artworks found in this collection</p>
+            </div>
+          )}
         </div>
       </main>
     </div>
