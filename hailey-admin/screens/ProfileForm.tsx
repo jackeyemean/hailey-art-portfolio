@@ -1,5 +1,5 @@
 // screens/ProfileForm.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ScrollView,
   View,
@@ -144,6 +144,8 @@ export default function ProfileForm({ route, navigation }: Props) {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     fetchProfile();
@@ -188,6 +190,10 @@ export default function ProfileForm({ route, navigation }: Props) {
   };
 
   const submitForm = async () => {
+    if (savingRef.current) return;
+    savingRef.current = true;
+    setIsSaving(true);
+
     let upload: { image: string; filename: string } | null = null;
 
     // Shrink the image to fit the API's size limit if new image selected
@@ -198,6 +204,8 @@ export default function ProfileForm({ route, navigation }: Props) {
         console.error('Error converting image to base64:', error);
         setErrorMessage('Failed to process image');
         setShowErrorModal(true);
+        savingRef.current = false;
+        setIsSaving(false);
         return;
       }
     }
@@ -221,6 +229,8 @@ export default function ProfileForm({ route, navigation }: Props) {
         const text = await res.text();
         setErrorMessage(text || `Status ${res.status}`);
         setShowErrorModal(true);
+        savingRef.current = false;
+        setIsSaving(false);
         return;
       }
       
@@ -241,10 +251,14 @@ export default function ProfileForm({ route, navigation }: Props) {
     } catch (error) {
       setErrorMessage('Unable to save profile.');
       setShowErrorModal(true);
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
     }
   };
 
   const handleSubmit = () => {
+    if (savingRef.current) return;
     setPendingAction(() => submitForm);
     setShowConfirmModal(true);
   };
@@ -341,8 +355,12 @@ export default function ProfileForm({ route, navigation }: Props) {
 
         {/* Submit */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>Update Profile</Text>
+          <TouchableOpacity
+            style={[styles.button, isSaving && styles.buttonDisabled]}
+            onPress={handleSubmit}
+            disabled={isSaving}
+          >
+            <Text style={styles.buttonText}>{isSaving ? 'Saving…' : 'Update Profile'}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -497,6 +515,9 @@ const createStyles = (isDark: boolean) =>
       paddingVertical: 12,
       borderRadius: 8,
       alignItems: 'center',
+    },
+    buttonDisabled: {
+      opacity: 0.5,
     },
     buttonText: {
       color: '#fff',

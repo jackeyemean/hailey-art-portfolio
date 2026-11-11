@@ -1,5 +1,5 @@
 // screens/ArtworkForm.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ScrollView,
   View,
@@ -149,6 +149,10 @@ export default function ArtworkForm({ route, navigation }: Props) {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  // React state updates aren't applied synchronously, so a ref backs the guard itself;
+  // isSaving only drives the button's disabled look and label.
+  const savingRef = useRef(false);
 
   useEffect(() => {
     if (!artworkId) return;
@@ -190,6 +194,12 @@ export default function ArtworkForm({ route, navigation }: Props) {
   };
 
   const submitForm = async () => {
+    // Without this guard, a slow upload with no visible feedback invites a second
+    // tap on Create/Update, which would submit the same artwork twice.
+    if (savingRef.current) return;
+    savingRef.current = true;
+    setIsSaving(true);
+
     let upload: { image: string; filename: string } | null = null;
 
     // Shrink the image to fit the API's size limit if new image selected
@@ -200,6 +210,8 @@ export default function ArtworkForm({ route, navigation }: Props) {
         console.error('Error converting image to base64:', error);
         setErrorMessage('Failed to process image');
         setShowErrorModal(true);
+        savingRef.current = false;
+        setIsSaving(false);
         return;
       }
     }
@@ -256,10 +268,14 @@ export default function ArtworkForm({ route, navigation }: Props) {
     } catch {
       setErrorMessage('Unable to save artwork.');
       setShowErrorModal(true);
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
     }
   };
 
   const handleSubmit = () => {
+    if (savingRef.current) return;
     if (!title.trim()) {
       setErrorMessage('Please enter a title.');
       setShowErrorModal(true);
@@ -443,9 +459,13 @@ export default function ArtworkForm({ route, navigation }: Props) {
 
         {/* Submit */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <TouchableOpacity
+            style={[styles.button, isSaving && styles.buttonDisabled]}
+            onPress={handleSubmit}
+            disabled={isSaving}
+          >
             <Text style={styles.buttonText}>
-              {artworkId ? 'Update' : 'Create'}
+              {isSaving ? 'Saving…' : artworkId ? 'Update' : 'Create'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -554,6 +574,9 @@ const createStyles = (isDark: boolean) =>
       paddingVertical: 10,
       borderRadius: 6,
       alignItems: 'center',
+    },
+    buttonDisabled: {
+      opacity: 0.5,
     },
     buttonText: {
       color: '#fff',
