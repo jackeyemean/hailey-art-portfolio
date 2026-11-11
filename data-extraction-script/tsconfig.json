@@ -14,7 +14,8 @@
     "types": ["node"]
   },
   "include": [
-    "extract.ts"
+    "extract-supabase.ts",
+    "migrate-to-supabase.ts"
   ],
   "exclude": [
     "node_modules",

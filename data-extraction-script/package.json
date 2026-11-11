@@ -2,13 +2,11 @@
   "name": "hailey-portfolio-data-extractor",
   "version": "1.0.0",
   "description": "Script to extract data from PostgreSQL and S3 for static site generation",
-  "main": "extract.js",
+  "main": "extract-supabase.ts",
   "scripts": {
-    "extract": "ts-node extract.ts",
     "extract-supabase": "ts-node extract-supabase.ts",
     "migrate-to-supabase": "ts-node migrate-to-supabase.ts",
-    "build": "tsc",
-    "start": "node dist/extract.js"
+    "build": "tsc"
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
