@@ -1,8 +1,8 @@
 // theme.ts: colors shared by every screen, in light and dark mode
 import { useColorScheme } from 'react-native';
 
-// Fresh leaf green: the admin's accent for main buttons, selected filters and links
-export const ACCENT = '#3F8A63';
+// Fern green: the admin's accent for main buttons, selected filters and links
+export const ACCENT = '#4C9A52';
 
 export function useTheme() {
   const isDark = useColorScheme() === 'dark';
@@ -14,7 +14,7 @@ export function useTheme() {
       border: isDark ? '#333' : '#ddd',
       text: isDark ? '#fff' : '#000',
       muted: isDark ? '#999' : '#666',
-      primary: isDark ? '#6DB88E' : ACCENT,
+      primary: isDark ? '#7CC383' : ACCENT,
       onPrimary: '#fff',
       danger: '#FF3B30',
       warning: isDark ? '#FFB340' : '#B25E00',
