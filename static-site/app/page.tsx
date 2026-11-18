@@ -10,25 +10,14 @@ export default async function HomePage() {
   const artworks = await fetchArtworks();
   const collections = await fetchCollectionsWithData();
   const artistPick = await fetchArtistPick();
-  
-  // Sort collections same way as before
-  const sortedCollections = collections.sort((a, b) => {
-    // Check if both are numbers
-    const aIsNumber = !isNaN(Number(a.name));
-    const bIsNumber = !isNaN(Number(b.name));
-    
-    // If both are numbers, sort numerically in descending order
-    if (aIsNumber && bIsNumber) {return Number(b.name) - Number(a.name);}
-    
-    // If only a is a number, a comes first
-    if (aIsNumber && !bIsNumber) {return -1;}
-    
-    // If only b is a number, b comes first
-    if (!aIsNumber && bIsNumber) {return 1;}
-    
-    // If both are text, sort alphabetically in descending order
-    return b.name.localeCompare(a.name);
-  });
+
+  // Collections arrive in the order set in the admin
+  const sortedCollections = collections;
+
+  // "View More From" links to the artist's pick's first collection
+  const artistPickCollection = artistPick?.collections?.length
+    ? collections.find(col => col.name === artistPick.collections[0])
+    : undefined;
 
   // Use local image path if available
   const artistPickImageSrc = artistPick?.localImagePath || artistPick?.imageUrl;
@@ -60,10 +49,10 @@ export default async function HomePage() {
                 ) : (<div className="artist-pick-card flex items-center justify-center"><p className="text-white text-lg">No artist pick set</p></div>)}
               </div>
               
-              {artistPick?.collection && (
-                <Link href={`/collection/${artistPick.collection}`} className="space-y-1 block collection-link mt-4">
+              {artistPickCollection && (
+                <Link href={`/collection/${artistPickCollection.slug}`} className="space-y-1 block collection-link mt-4">
                   <p className="body-large">View More From</p>
-                  <p className="heading-small collection-title">The {artistPick.collection} Collection</p>
+                  <p className="heading-small collection-title">The {artistPickCollection.name} Collection</p>
                 </Link>
               )}
             </div>

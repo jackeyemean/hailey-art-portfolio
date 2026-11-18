@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import { fetchArtworks, getAllArtworkIds, compareByViewOrder } from '@/lib/api';
-import { Artwork } from '@/types/artwork';
+import { fetchArtworks, fetchArtworkSequence, fetchCollectionByName, getAllArtworkIds } from '@/lib/api';
 import BackButton from '@/components/BackButton';
 
 // Generate static paths for all artworks
@@ -31,32 +30,12 @@ export default async function ArtworkPage({
     );
   }
 
-  // Group by collection, sort within collections, then sort collections
-  const artworksByCollection = new Map<string, Artwork[]>();
-  artworks.forEach(art => {
-    if (!artworksByCollection.has(art.collection)) {
-      artworksByCollection.set(art.collection, []);
-    }
-    artworksByCollection.get(art.collection)!.push(art);
-  });
+  // Previous/Next walk through every collection in homepage order
+  const sortedArtworks = await fetchArtworkSequence();
 
-  // Sort each collection's artworks
-  artworksByCollection.forEach(collectionArtworks => {
-    collectionArtworks.sort(compareByViewOrder);
-  });
-
-  // Sort collections and flatten
-  const sortedArtworks = Array.from(artworksByCollection.keys())
-    .sort((a, b) => {
-      const aIsNumber = /^\d+$/.test(a);
-      const bIsNumber = /^\d+$/.test(b);
-      
-      if (aIsNumber && bIsNumber) return Number(b) - Number(a);
-      if (aIsNumber) return -1;
-      if (bIsNumber) return 1;
-      return a.localeCompare(b);
-    })
-    .flatMap(collectionName => artworksByCollection.get(collectionName)!);
+  // "View Collection" goes to the artwork's first collection
+  const primaryCollection = artwork.collections.length > 0 ? await fetchCollectionByName(artwork.collections[0]) : undefined;
+  const collectionHref = primaryCollection ? `/collection/${primaryCollection.slug}` : '/';
 
   const currentIndex = sortedArtworks.findIndex(art => art.id === artwork.id);
   const prevArtwork = currentIndex > 0 ? sortedArtworks[currentIndex - 1] : sortedArtworks[sortedArtworks.length - 1];
@@ -72,8 +51,8 @@ export default async function ArtworkPage({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-24">
           <div className="flex justify-between items-center lg:justify-start">
             <BackButton />
-            <Link 
-              href={`/collection/${artwork.collection}`}
+            <Link
+              href={collectionHref}
               className="back-link opacity-60 hover:opacity-100 transition-opacity lg:hidden"
             >
               View Collection
@@ -131,7 +110,7 @@ export default async function ArtworkPage({
                   )}
                   
                   <div className="space-y-2">
-                    <p className="artwork-description">{artwork.collection}</p>
+                    <p className="artwork-description">{artwork.collections.join(', ')}</p>
                     <p className="artwork-description">{artwork.medium}</p>
                     <p className="artwork-description">{artwork.dimensions}</p>
                   </div>
@@ -147,8 +126,8 @@ export default async function ArtworkPage({
                   >
                     ← Previous
                   </Link>
-                  <Link 
-                    href={`/collection/${artwork.collection}`}
+                  <Link
+                    href={collectionHref}
                     className="back-link opacity-60 hover:opacity-100 transition-opacity hidden lg:block"
                   >
                     View Collection

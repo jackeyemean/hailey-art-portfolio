@@ -4,19 +4,19 @@ export interface Artwork {
   description?: string;
   imageUrl: string;
   localImagePath: string; // New field for local image path
-  collection: string;
+  collections: string[]; // collection names, in homepage order
   medium: string;
   dimensions: string;
   createdAt: string;
   isArtistPick: boolean;
-  isCollectionPick: boolean;
-  viewOrder?: number;
 }
 
 export interface Collection {
   name: string;
+  slug: string; // URL path segment: /collection/<slug>/
   count: number;
   thumbnail?: string;
+  artworkIds: string[]; // in display order
 }
 
 export interface Profile {

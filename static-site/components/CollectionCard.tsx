@@ -11,7 +11,7 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
   const yearText = isYear ? collection.name.slice(-2) : '';
 
   return (
-    <Link href={`/collection/${encodeURIComponent(collection.name)}`} className="group">
+    <Link href={`/collection/${collection.slug}`} className="group">
       <div className="collection-card group-hover:scale-105 transition-transform duration-300 ease-out">
         {collection.thumbnail ? (
           <img 

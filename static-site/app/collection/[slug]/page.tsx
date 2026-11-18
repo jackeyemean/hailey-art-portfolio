@@ -1,15 +1,12 @@
 import Link from 'next/link';
-import { fetchArtworks, getAllCollectionNames, compareByViewOrder } from '@/lib/api';
+import { notFound } from 'next/navigation';
+import { fetchCollection, fetchCollectionArtworks, getAllCollectionSlugs } from '@/lib/api';
 import { Artwork } from '@/types/artwork';
 import NavigationTracker from '@/components/NavigationTracker';
 
 // Generate static paths for all collections
 export async function generateStaticParams() {
-  const collectionNames = getAllCollectionNames();
-  
-  return collectionNames.map((name) => ({
-    collectionName: encodeURIComponent(name),
-  }));
+  return getAllCollectionSlugs().map((slug) => ({ slug }));
 }
 
 // Deals artworks into columns left to right (1, 2, 3 across the top row, then 4, 5, 6),
@@ -45,18 +42,16 @@ function formatCollectionTitle(collectionName: string): string {
 export default async function CollectionPage({ 
   params 
 }: { 
-  params: { collectionName: string } 
+  params: { slug: string }
 }) {
-  const artworks = await fetchArtworks();
-  const decodedCollectionName = decodeURIComponent(params.collectionName);
-  const collectionArtworks = artworks
-    .filter(art => art.collection === decodedCollectionName)
-    .sort(compareByViewOrder);
-  const formattedTitle = formatCollectionTitle(decodedCollectionName);
+  const collection = await fetchCollection(params.slug);
+  if (!collection) notFound();
+  const collectionArtworks = await fetchCollectionArtworks(collection);
+  const formattedTitle = formatCollectionTitle(collection.name);
 
   return (
     <div className="min-h-screen bg-[#F7F5F3]">
-      <NavigationTracker collectionName={decodedCollectionName} />
+      <NavigationTracker collectionName={collection.name} />
       <div className="page-margins py-6">
         <Link href="/" className="back-link">
           Back to Home

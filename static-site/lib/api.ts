@@ -11,37 +11,8 @@ function loadJsonFile<T>(filename: string): T {
   return JSON.parse(fileContents);
 }
 
-// Order within a collection: artworks with a View Order first (lowest first),
-// then those without one, newest first
-export function compareByViewOrder(a: Artwork, b: Artwork): number {
-  const aViewOrder = a.viewOrder ?? null;
-  const bViewOrder = b.viewOrder ?? null;
-
-  if (aViewOrder !== null && bViewOrder !== null) return aViewOrder - bViewOrder;
-  if (aViewOrder !== null) return -1;
-  if (bViewOrder !== null) return 1;
-  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-}
-
-export async function fetchArtworks(collection?: string): Promise<Artwork[]> {
-  const artworks = loadJsonFile<Artwork[]>('artworks.json');
-  
-  if (collection) {
-    return artworks.filter(art => art.collection === collection);
-  }
-  
-  return artworks;
-}
-
-export async function fetchArtwork(id: string): Promise<Artwork> {
-  const artworks = loadJsonFile<Artwork[]>('artworks.json');
-  const artwork = artworks.find(art => art.id === id);
-  
-  if (!artwork) {
-    throw new Error(`Artwork with id ${id} not found`);
-  }
-  
-  return artwork;
+export async function fetchArtworks(): Promise<Artwork[]> {
+  return loadJsonFile<Artwork[]>('artworks.json');
 }
 
 export async function fetchArtistPick(): Promise<Artwork | null> {
@@ -53,23 +24,41 @@ export async function fetchArtistPick(): Promise<Artwork | null> {
   }
 }
 
-export async function fetchCollectionPick(collection: string): Promise<Artwork | null> {
-  const artworks = loadJsonFile<Artwork[]>('artworks.json');
-  const collectionPick = artworks.find(art => 
-    art.isCollectionPick && art.collection === collection
-  );
-  
-  return collectionPick || null;
-}
-
-export async function fetchCollections(): Promise<string[]> {
-  const collections = loadJsonFile<Collection[]>('collections.json');
-  return collections.map(col => col.name).sort();
-}
-
+// Collections in homepage order
 export async function fetchCollectionsWithData(): Promise<Collection[]> {
-  const collections = loadJsonFile<Collection[]>('collections.json');
-  return collections;
+  return loadJsonFile<Collection[]>('collections.json');
+}
+
+export async function fetchCollection(slug: string): Promise<Collection | undefined> {
+  const collections = await fetchCollectionsWithData();
+  return collections.find(col => col.slug === slug);
+}
+
+export async function fetchCollectionByName(name: string): Promise<Collection | undefined> {
+  const collections = await fetchCollectionsWithData();
+  return collections.find(col => col.name === name);
+}
+
+// A collection's artworks, in display order
+export async function fetchCollectionArtworks(collection: Collection): Promise<Artwork[]> {
+  const byId = new Map((await fetchArtworks()).map(art => [art.id, art]));
+  return collection.artworkIds.map(id => byId.get(id)).filter((art): art is Artwork => Boolean(art));
+}
+
+// Every artwork once, for Previous/Next: each collection in homepage order (an artwork in several
+// collections appears where it first occurs), then any artworks not in a collection, newest first
+export async function fetchArtworkSequence(): Promise<Artwork[]> {
+  const artworks = await fetchArtworks();
+  const byId = new Map(artworks.map(art => [art.id, art]));
+  const ids = new Set<string>();
+  for (const collection of await fetchCollectionsWithData()) {
+    collection.artworkIds.forEach(id => { if (byId.has(id)) ids.add(id); });
+  }
+  const sequence = Array.from(ids).map(id => byId.get(id)!);
+  const unfiled = artworks
+    .filter(art => !ids.has(art.id))
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return [...sequence, ...unfiled];
 }
 
 export async function fetchProfile(): Promise<Profile> {
@@ -88,7 +77,7 @@ export function getAllArtworkIds(): string[] {
   return artworks.map(art => art.id);
 }
 
-export function getAllCollectionNames(): string[] {
+export function getAllCollectionSlugs(): string[] {
   const collections = loadJsonFile<Collection[]>('collections.json');
-  return collections.map(col => col.name);
+  return collections.map(col => col.slug);
 }
