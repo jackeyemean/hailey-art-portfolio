@@ -5,6 +5,7 @@ export type RootStackParamList = {
   ProfileForm: undefined;
   Collections: undefined;
   CollectionDetail: { collectionId: string; name: string };
+  Publish: undefined;
 };
 
 // A collection an artwork belongs to, with the artwork's position in it
@@ -66,4 +67,17 @@ export interface CollectionDetail {
 export interface Profile {
   description: string | null;
   imageUrl: string | null;
+}
+
+// Where publishing stands (GET /publish)
+export interface PublishStatus {
+  preview: {
+    state: 'none' | 'syncing' | 'building' | 'ready' | 'outdated' | 'failed';
+    url: string | null;
+    syncedAt: string | null;
+    changedFiles: number;
+    editedSinceSync: boolean;
+  };
+  live: { state: 'live' | 'updating' | 'failed' };
+  canPublish: boolean;
 }

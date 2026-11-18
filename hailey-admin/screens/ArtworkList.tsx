@@ -75,6 +75,7 @@ export default function ArtworkList({ navigation }: Props) {
         <>
           <Button small variant="secondary" title="Collections" onPress={() => navigation.navigate('Collections')} />
           <Button small variant="secondary" title="Profile" onPress={() => navigation.navigate('ProfileForm')} />
+          <Button small title="Publish" onPress={() => navigation.navigate('Publish')} />
         </>
       }
     >

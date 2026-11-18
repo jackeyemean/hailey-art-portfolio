@@ -12,8 +12,10 @@ import ArtworkForm from './screens/ArtworkForm';
 import ProfileForm from './screens/ProfileForm';
 import CollectionsScreen from './screens/CollectionsScreen';
 import CollectionDetailScreen from './screens/CollectionDetailScreen';
+import PublishScreen from './screens/PublishScreen';
 import { ADMIN_KEY } from './constants';
 import { setAdminKey } from './api';
+import { ACCENT } from './theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -108,7 +110,7 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     padding: 12,
-    backgroundColor: '#007AFF',
+    backgroundColor: ACCENT,
     borderRadius: 8,
     alignItems: 'center',
   },
@@ -178,6 +180,7 @@ export default function App() {
           <Stack.Screen name="ProfileForm" component={ProfileForm} options={{ title: 'Profile' }} />
           <Stack.Screen name="Collections" component={CollectionsScreen} options={{ title: 'Collections' }} />
           <Stack.Screen name="CollectionDetail" component={CollectionDetailScreen} options={{ title: 'Collection' }} />
+          <Stack.Screen name="Publish" component={PublishScreen} options={{ title: 'Publish' }} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

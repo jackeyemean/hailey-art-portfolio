@@ -6,6 +6,7 @@ import {
   CollectionDetail,
   CollectionSummary,
   Profile,
+  PublishStatus,
 } from './types';
 
 let adminKey = '';
@@ -42,6 +43,7 @@ async function request<T>(path: string, method = 'GET', body?: unknown): Promise
   }
   if (!res.ok) {
     if (res.status === 413) throw new ApiError('That image is too large to upload.');
+    if (res.status === 503 && data?.error) throw new ApiError(data.error); // e.g. publishing not set up
     if (res.status >= 500) throw new ApiError('Something went wrong on the server. Try again in a moment.');
     throw new ApiError(data?.error || `Something went wrong (error ${res.status}).`);
   }
@@ -70,6 +72,11 @@ export const deleteCollection = (id: string) => request<unknown>(`/collections/$
 export const getProfile = () => request<Profile>('/profile');
 export const updateProfile = (input: { description: string; image?: string; filename?: string }) =>
   request<Profile>('/profile', 'PUT', input);
+
+// Publishing
+export const getPublishStatus = () => request<PublishStatus>('/publish');
+export const syncPreview = () => request<PublishStatus>('/publish', 'POST', { action: 'preview' });
+export const syncLive = () => request<PublishStatus>('/publish', 'POST', { action: 'live' });
 
 export function errorMessage(error: unknown, fallback: string) {
   return error instanceof ApiError ? error.message : fallback;

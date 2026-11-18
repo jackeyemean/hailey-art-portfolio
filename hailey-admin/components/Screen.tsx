@@ -43,11 +43,12 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MAX_CONTENT_WIDTH,
     alignSelf: 'center',
+    flexWrap: 'wrap', // on narrow screens the actions move under the title
     gap: 12,
   },
   back: { paddingVertical: 4 },
   backText: { fontSize: 16, fontWeight: '600' },
-  title: { flex: 1, fontSize: 20, fontWeight: 'bold' },
+  title: { flexGrow: 1, flexShrink: 0, maxWidth: '100%', fontSize: 20, fontWeight: 'bold' },
   right: { flexDirection: 'row', gap: 8 },
   body: { flex: 1, width: '100%', maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center' },
 });
