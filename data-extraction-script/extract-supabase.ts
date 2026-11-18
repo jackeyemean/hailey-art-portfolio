@@ -27,13 +27,32 @@ interface ArtworkData {
   description?: string;
   imageUrl: string;
   localImagePath: string; // local image path for static site
-  collection: string;
+  collections: string[]; // collection names, in homepage order
   medium: string;
   dimensions: string;
   createdAt: string;
   isArtistPick: boolean;
-  isCollectionPick: boolean;
-  viewOrder?: number;
+}
+
+interface CollectionData {
+  name: string;
+  slug: string; // URL path segment: /collection/<slug>/
+  count: number;
+  thumbnail?: string;
+  artworkIds: string[]; // in display order
+}
+
+interface DbCollection {
+  id: string;
+  name: string;
+  displayOrder: number;
+  coverArtworkId: string | null;
+}
+
+interface DbMembership {
+  artworkId: string;
+  collectionId: string;
+  viewOrder: number | null;
 }
 
 interface ProfileData {
@@ -117,14 +136,31 @@ function getImageFilename(imageUrl: string): string {
   return filename.replace(/[^A-Za-z0-9._-]+/g, '-');
 }
 
-async function extractArtworks(): Promise<ArtworkData[]> {
+// Keeps the name readable in the URL while staying safe for any static file server.
+// Existing names ("2026", "Sketchbook") map to themselves, so their URLs don't change.
+function collectionSlug(name: string): string {
+  return name.trim().replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+async function fetchCollectionData() {
+  const [collectionsResult, membershipsResult] = await Promise.all([
+    supabase.from('Collection').select('id, name, displayOrder, coverArtworkId').order('displayOrder', { ascending: true }),
+    supabase.from('ArtworkCollection').select('artworkId, collectionId, viewOrder'),
+  ]);
+  if (collectionsResult.error) throw new Error(`Failed to fetch collections: ${collectionsResult.error.message}`);
+  if (membershipsResult.error) throw new Error(`Failed to fetch collection memberships: ${membershipsResult.error.message}`);
+  return {
+    collections: collectionsResult.data as DbCollection[],
+    memberships: membershipsResult.data as DbMembership[],
+  };
+}
+
+async function extractArtworks(dbCollections: DbCollection[], memberships: DbMembership[]): Promise<ArtworkData[]> {
   console.log('Extracting artwork data from Supabase...');
-  
+
   const { data: artworks, error } = await supabase
     .from('Artwork')
     .select('*')
-    .order('collection', { ascending: true })
-    .order('viewOrder', { ascending: true, nullsFirst: false })
     .order('createdAt', { ascending: false });
 
   if (error) {
@@ -132,6 +168,11 @@ async function extractArtworks(): Promise<ArtworkData[]> {
   }
 
   console.log(`Found ${artworks.length} artworks`);
+
+  // Collection names per artwork, in homepage order (dbCollections is already sorted)
+  const namesFor = (artworkId: string) => dbCollections
+    .filter(c => memberships.some(m => m.artworkId === artworkId && m.collectionId === c.id))
+    .map(c => c.name);
 
   const artworkData: ArtworkData[] = [];
   const failures: string[] = [];
@@ -160,13 +201,11 @@ async function extractArtworks(): Promise<ArtworkData[]> {
       description: artwork.description || undefined,
       imageUrl: artwork.imageUrl, // Keep original for reference
       localImagePath: localImagePath, // New local path
-      collection: artwork.collection,
+      collections: namesFor(artwork.id),
       medium: artwork.medium,
       dimensions: artwork.dimensions,
       createdAt: artwork.createdAt,
       isArtistPick: artwork.isArtistPick,
-      isCollectionPick: artwork.isCollectionPick,
-      viewOrder: artwork.viewOrder ?? undefined,
     });
   }
 
@@ -266,14 +305,58 @@ async function extractProfile(): Promise<ProfileData | null> {
   };
 }
 
+// Collections as the site uses them: homepage order, each with its artworks in display order
+// (positioned artworks first, lowest first, then the rest newest first). Empty collections
+// are left out so the homepage never shows a card without an image.
+function buildCollections(dbCollections: DbCollection[], memberships: DbMembership[], artworks: ArtworkData[]): CollectionData[] {
+  const byId = new Map(artworks.map(a => [a.id, a]));
+  const result: CollectionData[] = [];
+
+  for (const collection of dbCollections) {
+    const members = memberships
+      .filter(m => m.collectionId === collection.id && byId.has(m.artworkId))
+      .sort((a, b) => {
+        if (a.viewOrder !== null && b.viewOrder !== null) return a.viewOrder - b.viewOrder;
+        if (a.viewOrder !== null) return -1;
+        if (b.viewOrder !== null) return 1;
+        return new Date(byId.get(b.artworkId)!.createdAt).getTime() - new Date(byId.get(a.artworkId)!.createdAt).getTime();
+      });
+    if (members.length === 0) continue;
+
+    const artworkIds = members.map(m => m.artworkId);
+    const coverId = collection.coverArtworkId && artworkIds.includes(collection.coverArtworkId)
+      ? collection.coverArtworkId
+      : artworkIds[0];
+
+    result.push({
+      name: collection.name,
+      slug: collectionSlug(collection.name),
+      count: artworkIds.length,
+      thumbnail: byId.get(coverId)?.localImagePath,
+      artworkIds,
+    });
+  }
+
+  // Two names that differ only in punctuation would otherwise fight over one URL
+  const slugs = result.map(c => c.slug);
+  const clash = result.find((c, i) => !c.slug || slugs.indexOf(c.slug) !== i);
+  if (clash) {
+    throw new Error(`Collection "${clash.name}" has no usable URL or shares one with another collection; rename it in the admin, no files were updated.`);
+  }
+
+  return result;
+}
+
 async function generateStaticData(): Promise<void> {
   console.log('Generating static data files...');
-  
+
   await fs.ensureDir(DATA_DIR);
   await fs.ensureDir(IMAGES_DIR);
 
-  const artworks = await extractArtworks();
+  const { collections: dbCollections, memberships } = await fetchCollectionData();
+  const artworks = await extractArtworks(dbCollections, memberships);
   const profile = await extractProfile();
+  const collections = buildCollections(dbCollections, memberships, artworks);
 
   // Clean up orphaned images - build list of expected images
   const expectedImages: string[] = [];
@@ -288,20 +371,6 @@ async function generateStaticData(): Promise<void> {
   
   await cleanupOrphanedImages(expectedImages);
 
-  const collections = Array.from(
-    new Set(artworks.map(art => art.collection))
-  ).filter(name => name.trim() !== '').map(name => {
-    const collectionArtworks = artworks.filter(art => art.collection === name);
-    const collectionPick = collectionArtworks.find(art => art.isCollectionPick);
-    const thumbnail = collectionPick?.localImagePath || collectionArtworks[0]?.localImagePath;
-    
-    return {
-      name,
-      count: collectionArtworks.length,
-      thumbnail
-    };
-  });
-
   // artist pick
   const artistPick = artworks.find(art => art.isArtistPick) || null;
 
@@ -314,7 +383,7 @@ async function generateStaticData(): Promise<void> {
   // generate route data for static generation
   const routes = {
     artworkIds: artworks.map(art => art.id),
-    collectionNames: collections.map(col => col.name)
+    collectionSlugs: collections.map(col => col.slug)
   };
   await fs.writeJson(path.join(DATA_DIR, 'routes.json'), routes, { spaces: 2 });
 
