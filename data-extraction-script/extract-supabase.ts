@@ -176,24 +176,29 @@ async function extractArtworks(dbCollections: DbCollection[], memberships: DbMem
 
   const artworkData: ArtworkData[] = [];
   const failures: string[] = [];
+  let skipped = 0;
 
   for (const artwork of artworks) {
     const filename = getImageFilename(artwork.imageUrl);
     const localImagePath = `/data/images/${filename.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`;
     const fullImagePath = path.join(IMAGES_DIR, filename);
 
-    console.log(`📥 Downloading and optimizing "${artwork.title}": ${filename}`);
-    
-    try {
-      await downloadWithRetry(artwork.imageUrl, fullImagePath);
-      console.log(`✅ Complete: ${filename.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`);
-    } catch (error) {
-      console.error(`❌ Failed to process ${filename}:`, error);
-      failures.push(`"${artwork.title}" (${filename})`);
-    }
+    // Uploaded images get a new, unique filename, so one already on disk never needs refreshing
+    if (alreadyDownloaded(localImagePath)) {
+      skipped++;
+    } else {
+      console.log(`📥 Downloading and optimizing "${artwork.title}": ${filename}`);
+      try {
+        await downloadWithRetry(artwork.imageUrl, fullImagePath);
+        console.log(`✅ Complete: ${filename.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`);
+      } catch (error) {
+        console.error(`❌ Failed to process ${filename}:`, error);
+        failures.push(`"${artwork.title}" (${filename})`);
+      }
 
-    // Add small delay to prevent rate limiting
-    await new Promise(resolve => setTimeout(resolve, 150));
+      // Add small delay to prevent rate limiting
+      await new Promise(resolve => setTimeout(resolve, 150));
+    }
 
     artworkData.push({
       id: artwork.id,
@@ -209,12 +214,19 @@ async function extractArtworks(dbCollections: DbCollection[], memberships: DbMem
     });
   }
 
+  if (skipped > 0) console.log(`⏭️  ${skipped} images already downloaded`);
+
   // Stop before any data file is written, so a flaky connection can't publish broken image paths
   if (failures.length > 0) {
     throw new Error(`${failures.length} image(s) failed to download, no files were updated. Re-run the script.\n  ${failures.join('\n  ')}`);
   }
 
   return artworkData;
+}
+
+// True when the optimized .webp for a site image path (/data/images/x.webp) is already on disk
+function alreadyDownloaded(localImagePath: string): boolean {
+  return fs.existsSync(path.join(IMAGES_DIR, path.basename(localImagePath)));
 }
 
 async function cleanupOrphanedImages(expectedImages: string[]): Promise<void> {
@@ -283,17 +295,15 @@ async function extractProfile(): Promise<ProfileData | null> {
     localImagePath = `/data/images/${filename.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`;
     const fullImagePath = path.join(IMAGES_DIR, filename);
 
-    console.log(`📥 Downloading and optimizing profile image: ${filename}`);
-    
-    try {
-      await downloadWithRetry(profile.imageUrl, fullImagePath);
-      console.log(`✅ Complete: ${filename.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`);
-    } catch (error) {
-      throw new Error(`Profile image ${filename} failed to download, no files were updated. Re-run the script. (${(error as Error).message})`);
+    if (!alreadyDownloaded(localImagePath)) {
+      console.log(`📥 Downloading and optimizing profile image: ${filename}`);
+      try {
+        await downloadWithRetry(profile.imageUrl, fullImagePath);
+        console.log(`✅ Complete: ${filename.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`);
+      } catch (error) {
+        throw new Error(`Profile image ${filename} failed to download, no files were updated. Re-run the script. (${(error as Error).message})`);
+      }
     }
-
-    // Add small delay to prevent rate limiting
-    await new Promise(resolve => setTimeout(resolve, 150));
   }
 
   return {
@@ -393,7 +403,7 @@ async function generateStaticData(): Promise<void> {
   console.log(`   - profile.json`);
   console.log(`   - artist-pick.json`);
   console.log(`   - routes.json`);
-  console.log(`   - Downloaded ${artworks.length + (profile?.localImagePath ? 1 : 0)} images`);
+  console.log(`   - ${artworks.length + (profile?.localImagePath ? 1 : 0)} images up to date`);
   console.log(`   - Cleaned up orphaned images`);
 }
 
