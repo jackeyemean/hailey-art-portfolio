@@ -56,6 +56,23 @@
     ]
   },
   {
+    "name": "30 in 30",
+    "slug": "30-in-30",
+    "count": 9,
+    "thumbnail": "/data/images/1794703636232-Hibernation.webp",
+    "artworkIds": [
+      "d953dcbd-e5d1-4c50-b458-8436fe9187a6",
+      "11f863b6-373a-435e-a193-d01a142dfae3",
+      "2b8e53c5-c391-4347-a1da-dfa65fac219c",
+      "87c6a346-8c19-4929-806f-c747a4c9becc",
+      "f284c4cb-1a8f-4618-ab97-460026d4044b",
+      "69529d50-535d-4f8d-862f-14fa526922ea",
+      "32ca06f8-e4f2-4bf7-8436-2463db6348dc",
+      "b87a83fa-fea6-4323-99ab-428c77c9c956",
+      "5f10d929-7fe5-4e97-bbf3-a32f07ce8805"
+    ]
+  },
+  {
     "name": "2024",
     "slug": "2024",
     "count": 8,
@@ -133,23 +150,6 @@
       "71ef3a67-728b-407c-a8f3-04a6f5d6d3f8",
       "0cebeca8-5773-4353-97a6-caaf6a06f9e1",
       "b7a381a1-ba65-430c-9d70-ae5281ce1005"
-    ]
-  },
-  {
-    "name": "30 in 30",
-    "slug": "30-in-30",
-    "count": 9,
-    "thumbnail": "/data/images/1794703636232-Hibernation.webp",
-    "artworkIds": [
-      "d953dcbd-e5d1-4c50-b458-8436fe9187a6",
-      "11f863b6-373a-435e-a193-d01a142dfae3",
-      "2b8e53c5-c391-4347-a1da-dfa65fac219c",
-      "87c6a346-8c19-4929-806f-c747a4c9becc",
-      "f284c4cb-1a8f-4618-ab97-460026d4044b",
-      "69529d50-535d-4f8d-862f-14fa526922ea",
-      "32ca06f8-e4f2-4bf7-8436-2463db6348dc",
-      "b87a83fa-fea6-4323-99ab-428c77c9c956",
-      "5f10d929-7fe5-4e97-bbf3-a32f07ce8805"
     ]
   }
 ]
