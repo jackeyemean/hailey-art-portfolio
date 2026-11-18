@@ -1,32 +1,155 @@
 [
   {
-    "name": "2022",
-    "count": 7,
-    "thumbnail": "/data/images/1767587252095-1755800973226-DSCN6006.webp"
-  },
-  {
-    "name": "2023",
-    "count": 13,
-    "thumbnail": "/data/images/1767587256009-1755743072207-DSCN6019.webp"
-  },
-  {
-    "name": "2024",
-    "count": 8,
-    "thumbnail": "/data/images/1767587261032-1754901707888-DSCN2532.webp"
+    "name": "2026",
+    "slug": "2026",
+    "count": 26,
+    "thumbnail": "/data/images/1794701483844-Sun-on-Alps.webp",
+    "artworkIds": [
+      "2f29ade9-81e3-4e56-bd3a-07b05dcd81d3",
+      "44fc6523-d060-4f42-939d-e9a945f218ad",
+      "577ffb12-8a7e-4860-b3fa-dfe962e63e06",
+      "340ecf2b-3f06-4888-8453-8c61b2865810",
+      "8c7cfbc2-4e3c-4bec-956e-f357b51be9b7",
+      "e0209520-6737-48f5-b068-a795ead4aab4",
+      "fbc86581-f67d-45f5-b546-09e786118d2b",
+      "1a950250-beae-4a53-b8ea-8e5ab13e6c27",
+      "7b0a4e24-7f1f-45a8-82f6-296616f7e303",
+      "1b6ce3c9-772b-49d4-a0ca-ac4a864a2d20",
+      "f044a045-7cf2-4f38-94d5-a6a1dbba8087",
+      "f6821070-c455-412a-aff7-bf7c3b4e8a8f",
+      "3e4a018b-e031-461e-a625-e1a5ebff9e42",
+      "e8cf3bb3-9a10-427f-a1ea-65e3c5c97e88",
+      "6e1c8ae7-5f65-47e4-a286-5f03c92235da",
+      "803fab03-d43c-435b-aff7-ad350f437b8f",
+      "9493d91d-6bbc-4f9f-addb-34f269a81f18",
+      "5f10d929-7fe5-4e97-bbf3-a32f07ce8805",
+      "b87a83fa-fea6-4323-99ab-428c77c9c956",
+      "32ca06f8-e4f2-4bf7-8436-2463db6348dc",
+      "69529d50-535d-4f8d-862f-14fa526922ea",
+      "f284c4cb-1a8f-4618-ab97-460026d4044b",
+      "87c6a346-8c19-4929-806f-c747a4c9becc",
+      "2b8e53c5-c391-4347-a1da-dfa65fac219c",
+      "11f863b6-373a-435e-a193-d01a142dfae3",
+      "d953dcbd-e5d1-4c50-b458-8436fe9187a6"
+    ]
   },
   {
     "name": "2025",
-    "count": 13,
-    "thumbnail": "/data/images/1767656394724-DSCN6829.webp"
+    "slug": "2025",
+    "count": 14,
+    "thumbnail": "/data/images/1767656394724-DSCN6829.webp",
+    "artworkIds": [
+      "cb9716b7-0e6a-44dd-9855-5337023a6211",
+      "4b0745f5-e4e7-490d-83c7-408a3c0d3b0c",
+      "fc82351e-571d-4c7b-845d-04b295c17544",
+      "71c2071c-3c11-4f63-9fad-77d32203de14",
+      "ee8e71c9-8d91-4ded-9a88-30ba71664f81",
+      "d9bfd6f4-9223-4a9c-9ded-694973240cb6",
+      "89cb97ea-0ef7-4453-b002-3823306f43ee",
+      "31eb5e4b-5b2d-4bc2-ba7b-6d038627d645",
+      "25884757-42f3-4691-8623-14787b5dbe74",
+      "dc8e2221-0781-4dfd-9e78-30e472edba04",
+      "e602ff7f-957d-4aa7-95b1-4adb2f15ae8b",
+      "d7d5f963-4c04-4147-a449-e70425f4dc43",
+      "3c7fc665-d121-4989-9d02-cc3ef25e8dbd",
+      "a5a44363-3099-4ed9-b6d7-fcccf3aed166"
+    ]
   },
   {
-    "name": "2026",
-    "count": 16,
-    "thumbnail": "/data/images/1794369264403-Sun-on-Alps.webp"
+    "name": "2024",
+    "slug": "2024",
+    "count": 8,
+    "thumbnail": "/data/images/1767587261032-1754901707888-DSCN2532.webp",
+    "artworkIds": [
+      "942cb06a-5440-4f62-a3ce-aa3fd70e89fc",
+      "147e87eb-288b-4241-81fe-78ade5f2a1cd",
+      "6f4d798e-6f3b-469c-a143-84eacaa12ca2",
+      "a2c246bc-39c2-4ca7-8788-eab36feee125",
+      "beaeedbf-3bf7-4814-92e2-ccbef16e5032",
+      "c5d6c034-bfcd-4856-9e8e-f8dd4e8fc22f",
+      "aea300b8-674d-43bd-a27b-67f2dd617b6e",
+      "501bcd51-1838-43db-aee5-ceafac87b7d1"
+    ]
+  },
+  {
+    "name": "2023",
+    "slug": "2023",
+    "count": 13,
+    "thumbnail": "/data/images/1767587256009-1755743072207-DSCN6019.webp",
+    "artworkIds": [
+      "a816b598-5599-486d-97fb-0d1572397073",
+      "fc583d5a-282d-4871-9db2-251fd818b1db",
+      "6271e61c-db87-4746-81ef-2d1c602f88e5",
+      "62902195-bfa8-4a4d-a189-aa63785a26d3",
+      "297c0b25-608f-45ad-bde0-e7c35ab558e0",
+      "a46f72bc-dc32-40ad-89ef-5bc3c9f19284",
+      "e3753324-59af-4930-894d-042ecffdea0c",
+      "9f39e9a5-cfba-431e-9239-9a1dd2d68ae8",
+      "67e16199-44e9-4e51-b555-5a4d87fbbd64",
+      "067d40a7-405d-43ca-b1ce-983167b2990c",
+      "e35085b1-c521-473a-a76c-eb65d394b347",
+      "669b279c-27a4-4173-8522-9c664974e77e",
+      "0b0704fa-d7a4-423f-b491-22b118239c30"
+    ]
+  },
+  {
+    "name": "2022",
+    "slug": "2022",
+    "count": 7,
+    "thumbnail": "/data/images/1767587252095-1755800973226-DSCN6006.webp",
+    "artworkIds": [
+      "6074255d-84dd-48f4-955f-5985152a8648",
+      "8c27d441-fced-42b3-9258-fb79ac69c172",
+      "0698fbaa-4821-4706-ac7f-29b3067362e8",
+      "1bd8ab02-37cc-4a7e-ae89-3492bcab5716",
+      "3924b376-d86a-4b00-9c1d-fdc43207b5ce",
+      "a17a2392-912e-4891-9ce0-9f73cf0226b9",
+      "e5416b88-f38d-4678-a7ed-e605d2401901"
+    ]
   },
   {
     "name": "Sketchbook",
+    "slug": "Sketchbook",
     "count": 20,
-    "thumbnail": "/data/images/1767587265645-1756686688991-DSCN6052.webp"
+    "thumbnail": "/data/images/1767587265645-1756686688991-DSCN6052.webp",
+    "artworkIds": [
+      "5e7c3b81-646c-43b2-a2b8-926fdd81e13b",
+      "40186798-6296-4dcc-a306-0c61faef0454",
+      "0afe8524-9509-42b3-bb1c-36ca8fd22fed",
+      "1f4a0d10-df7a-4b20-a9f8-a966349110d9",
+      "993dfba1-d772-4020-877a-c660bc888afa",
+      "24efcda0-ad2d-4c77-92f7-2affc305cdf5",
+      "48d72b21-5209-4f33-ad96-0fa3d7ff9164",
+      "e60f8c59-6910-4add-8595-e3f425f190d0",
+      "a11e6902-d7bd-4fa8-8722-2d49bfe1882f",
+      "93b549c0-6620-4d15-9931-34e1f3c65bba",
+      "5027e529-6be5-456f-b781-9b783a6cf02d",
+      "400b90ee-d275-4393-8c97-8231b4d66922",
+      "5e33323c-f1ad-4f8e-8f1e-b73846dd33af",
+      "db8c89ba-6761-4ae5-9010-e9af557d7cd7",
+      "54dddd27-4be1-4ec4-bc18-7772f36be963",
+      "373871de-b9b3-410e-96f7-8cdf72390275",
+      "d4fb6a87-6ba9-4842-a0a4-97557fae4abb",
+      "71ef3a67-728b-407c-a8f3-04a6f5d6d3f8",
+      "0cebeca8-5773-4353-97a6-caaf6a06f9e1",
+      "b7a381a1-ba65-430c-9d70-ae5281ce1005"
+    ]
+  },
+  {
+    "name": "30 in 30",
+    "slug": "30-in-30",
+    "count": 9,
+    "thumbnail": "/data/images/1794703636232-Hibernation.webp",
+    "artworkIds": [
+      "d953dcbd-e5d1-4c50-b458-8436fe9187a6",
+      "11f863b6-373a-435e-a193-d01a142dfae3",
+      "2b8e53c5-c391-4347-a1da-dfa65fac219c",
+      "87c6a346-8c19-4929-806f-c747a4c9becc",
+      "f284c4cb-1a8f-4618-ab97-460026d4044b",
+      "69529d50-535d-4f8d-862f-14fa526922ea",
+      "32ca06f8-e4f2-4bf7-8436-2463db6348dc",
+      "b87a83fa-fea6-4323-99ab-428c77c9c956",
+      "5f10d929-7fe5-4e97-bbf3-a32f07ce8805"
+    ]
   }
 ]
