@@ -24,10 +24,9 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
         {isYear ? (
           <div className="collection-number">{yearText}</div>
         ) : (
+          // Other names stay on one line, wrapping only if too long for the card
           <div className="collection-text">
-            {collection.name.split(' ').map((word, index) => (
-              <span key={index}>{word}</span>
-            ))}
+            <span>{collection.name}</span>
           </div>
         )}
       </div>
