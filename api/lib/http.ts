@@ -1,4 +1,5 @@
 // Shared plumbing for the serverless routes: CORS, JSON body parsing, admin auth and errors.
+import { supabase } from './supabase';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE';
 type RouteHandler = (req: any, res: any, body: any) => Promise<unknown>;
@@ -33,10 +34,17 @@ function parseBody(req: any) {
   }
 }
 
+// Notes the time of the latest change to the site's content, for the publish screen
+async function recordEdit() {
+  const { error } = await supabase.from('SiteState').upsert({ key: 'lastEditAt', value: new Date().toISOString() });
+  if (error) console.error('Could not record edit time:', error.message);
+}
+
 /**
  * Builds a route from per-method handlers. Every method except GET requires the admin key.
+ * Successful writes are recorded as content edits unless `recordsEdits` is false.
  */
-export function route(handlers: Partial<Record<Method, RouteHandler>>) {
+export function route(handlers: Partial<Record<Method, RouteHandler>>, { recordsEdits = true } = {}) {
   const methods = Object.keys(handlers);
 
   return async function handler(req: any, res: any) {
@@ -57,6 +65,7 @@ export function route(handlers: Partial<Record<Method, RouteHandler>>) {
 
     try {
       const result = await fn(req, res, parseBody(req));
+      if (recordsEdits && req.method !== 'GET') await recordEdit();
       if (!res.headersSent) res.status(200).json(result ?? null);
     } catch (error: any) {
       if (error instanceof HttpError) {
