@@ -1,169 +1,67 @@
-// Vercel serverless function
+// Vercel serverless function: read, update and delete one artwork
 import { supabase } from '../../lib/supabase';
 import { uploadImageToSupabase, deleteImageFromSupabase } from '../../lib/supabase-storage';
-import { parseViewOrder } from '../../lib/view-order';
+import { route, requireString } from '../../lib/http';
+import { getArtwork, setArtworkCollections } from '../../lib/collections';
 
-export default async function handler(req: any, res: any) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', 'https://hailey-web-admin.vercel.app');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-admin-key');
+export default route({
+  GET: async (req) => getArtwork(req.query.id),
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  PUT: async (req, res, body) => {
+    const { id } = req.query;
+    const existing = await getArtwork(id);
+    const { description, medium, dimensions, isArtistPick, collectionIds } = body;
 
-  const { id } = req.query;
-
-  if (!id) {
-    return res.status(400).json({ error: 'Artwork ID is required' });
-  }
-
-  // Parse JSON body
-  let body = req.body;
-  if (typeof body === 'string') {
-    try {
-      body = JSON.parse(body);
-    } catch (e) {
-      console.error('Failed to parse JSON body:', e);
-      return res.status(400).json({ error: 'Invalid JSON' });
-    }
-  }
-
-  console.log('API Request:', req.method, req.url);
-
-  try {
-    if (req.method === 'GET') {
-      // Get single artwork
-      const { data, error } = await supabase
-        .from('Artwork')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error?.code === 'PGRST116') { // no rows returned
-        return res.status(404).json({ error: 'Artwork not found' });
-      }
-      if (error) throw error;
-      
-      return res.status(200).json(data);
-
-    } else if (req.method === 'PUT') {
-      // Update artwork - requires admin key
-      const adminKey = req.headers['x-admin-key'];
-      if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
-      
-      const { title, description, collection, medium, dimensions, isArtistPick, isCollectionPick, viewOrder } = body || {};
-      
-      let updateData: any = {
-        title,
-        description,
-        collection,
-        medium,
-        dimensions,
-        isArtistPick: Boolean(isArtistPick),
-        isCollectionPick: Boolean(isCollectionPick),
-        viewOrder: parseViewOrder(viewOrder)
-      };
-
-      // If there's a new image, remember the old one so it can be removed after a successful update
-      let previousImageUrl: string | null = null;
-      if (body?.image) {
-        const { data: existing } = await supabase
-          .from('Artwork')
-          .select('imageUrl')
-          .eq('id', id)
-          .single();
-        previousImageUrl = existing?.imageUrl || null;
-
-        const imageBuffer = Buffer.from(body.image, 'base64');
-        const filename = body.filename || 'artwork.jpg';
-        updateData.imageUrl = await uploadImageToSupabase(imageBuffer, filename);
-      }
-
-      // Handle exclusive picks logic
-      if (Boolean(isArtistPick)) {
-        // Clear any existing artist pick (except this artwork)
-        await supabase
-          .from('Artwork')
-          .update({ isArtistPick: false })
-          .eq('isArtistPick', true)
-          .neq('id', id);
-      }
-
-      if (Boolean(isCollectionPick) && collection) {
-        // Clear any existing collection pick in this collection (except this artwork)
-        await supabase
-          .from('Artwork')
-          .update({ isCollectionPick: false })
-          .eq('collection', collection)
-          .eq('isCollectionPick', true)
-          .neq('id', id);
-      }
-
-      const { data, error } = await supabase
-        .from('Artwork')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .limit(1);
-
-      if (error) throw error;
-
-      const artwork = data && data.length > 0 ? data[0] : null;
-
-      // The replaced image is no longer used; failing to remove it shouldn't fail the update
-      if (artwork && previousImageUrl && previousImageUrl !== artwork.imageUrl) {
-        try {
-          await deleteImageFromSupabase(previousImageUrl);
-        } catch (error) {
-          console.error('Error deleting replaced image:', error);
-        }
-      }
-
-      return res.status(200).json(artwork);
-
-    } else if (req.method === 'DELETE') {
-      // Delete artwork - requires admin key
-      const adminKey = req.headers['x-admin-key'];
-      if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
-
-      // First get the artwork's image so it can be removed once the row is gone
-      const { data: artwork } = await supabase
-        .from('Artwork')
-        .select('imageUrl')
-        .eq('id', id)
-        .single();
-
-      const { error } = await supabase
-        .from('Artwork')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      // Failing to remove the image shouldn't fail the delete; it only leaves an unused file
-      if (artwork?.imageUrl) {
-        try {
-          await deleteImageFromSupabase(artwork.imageUrl);
-        } catch (error) {
-          console.error('Error deleting image:', error);
-        }
-      }
-
-      return res.status(200).json({ message: 'Artwork deleted successfully' });
-
-    } else {
-      return res.status(405).json({ error: 'Method not allowed' });
+    const updateData: Record<string, unknown> = {
+      title: requireString(body.title, 'Title'),
+      description,
+      medium,
+      dimensions,
+      isArtistPick: Boolean(isArtistPick),
+    };
+    if (body.image) {
+      updateData.imageUrl = await uploadImageToSupabase(Buffer.from(body.image, 'base64'), body.filename || 'artwork.jpg');
     }
 
-  } catch (error) {
-    console.error('API Error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-}
+    // Only one artwork can be the artist's pick
+    if (isArtistPick) {
+      await supabase.from('Artwork').update({ isArtistPick: false }).eq('isArtistPick', true).neq('id', id);
+    }
+
+    const { error } = await supabase.from('Artwork').update(updateData).eq('id', id);
+    if (error) throw error;
+
+    if (collectionIds !== undefined) await setArtworkCollections(id, collectionIds);
+
+    // The replaced image is no longer used; failing to remove it shouldn't fail the update
+    if (updateData.imageUrl && existing.imageUrl && existing.imageUrl !== updateData.imageUrl) {
+      try {
+        await deleteImageFromSupabase(existing.imageUrl);
+      } catch (error) {
+        console.error('Error deleting replaced image:', error);
+      }
+    }
+
+    return getArtwork(id);
+  },
+
+  DELETE: async (req) => {
+    const { id } = req.query;
+    const artwork = await getArtwork(id);
+
+    // Memberships are removed by the database, and any collection using it as a cover is cleared
+    const { error } = await supabase.from('Artwork').delete().eq('id', id);
+    if (error) throw error;
+
+    // Failing to remove the image shouldn't fail the delete; it only leaves an unused file
+    if (artwork.imageUrl) {
+      try {
+        await deleteImageFromSupabase(artwork.imageUrl);
+      } catch (error) {
+        console.error('Error deleting image:', error);
+      }
+    }
+
+    return { message: 'Artwork deleted successfully' };
+  },
+});

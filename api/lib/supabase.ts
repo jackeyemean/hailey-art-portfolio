@@ -11,19 +11,32 @@ export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   }
 });
 
-// Database types based on your schema
+// Database types based on your schema. "Artwork" also still has the legacy
+// collection / isCollectionPick / viewOrder columns, which are no longer used.
 export interface Artwork {
   id: string;
   title: string;
   description?: string;
   imageUrl: string;
-  collection: string;
   medium: string;
   dimensions: string;
   createdAt: string;
   isArtistPick: boolean;
-  isCollectionPick: boolean;
-  viewOrder?: number;
+}
+
+export interface Collection {
+  id: string;
+  name: string;
+  displayOrder: number; // position on the homepage
+  coverArtworkId: string | null;
+  createdAt: string;
+}
+
+// An artwork's membership in a collection
+export interface ArtworkCollection {
+  artworkId: string;
+  collectionId: string;
+  viewOrder: number | null; // position within the collection
 }
 
 export interface Profile {
