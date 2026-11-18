@@ -3,8 +3,6 @@ import {
   ADMIN_KEY as ENV_ADMIN_KEY,
 } from '@env'
 
-export const API_URL    = ENV_API_URL || 'https://hailey-art-api.vercel.app/api'
-export const ADMIN_KEY  = ENV_ADMIN_KEY ?? ''
-
-// No longer needed - images are now served directly from Supabase Storage
-// export const BUCKET_URL = `https://${ENV_S3_BUCKET_NAME}.s3.amazonaws.com`
+// EXPO_PUBLIC_API_URL (set in the shell) points a local run at a local API without editing .env
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || ENV_API_URL || 'https://hailey-art-api.vercel.app/api'
+export const ADMIN_KEY = ENV_ADMIN_KEY ?? ''

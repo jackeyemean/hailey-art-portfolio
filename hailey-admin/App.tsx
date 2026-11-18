@@ -4,22 +4,33 @@ import { Alert, View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } 
 import * as ImagePicker from 'expo-image-picker';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import {
-  createNativeStackNavigator,
-  NativeStackNavigationOptions
-} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { RootStackParamList } from './types';
 import ArtworkList from './screens/ArtworkList';
 import ArtworkForm from './screens/ArtworkForm';
 import ProfileForm from './screens/ProfileForm';
+import CollectionsScreen from './screens/CollectionsScreen';
+import CollectionDetailScreen from './screens/CollectionDetailScreen';
 import { ADMIN_KEY } from './constants';
+import { setAdminKey } from './api';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+// On the web, remember a successful login in this browser so the key isn't retyped every visit
+const STORAGE_KEY = 'hailey-admin-key';
+const storage = {
+  get: () => {
+    try { return Platform.OS === 'web' ? window.localStorage.getItem(STORAGE_KEY) : null; } catch { return null; }
+  },
+  set: (key: string) => {
+    try { if (Platform.OS === 'web') window.localStorage.setItem(STORAGE_KEY, key); } catch {}
+  },
+};
+
 // Simple login component
 const LoginScreen = ({ onLogin }: { onLogin: (adminKey: string) => void }) => {
-  const [adminKey, setAdminKey] = useState('');
+  const [adminKey, setAdminKeyInput] = useState('');
   const [error, setError] = useState('');
 
   const handleLogin = () => {
@@ -33,15 +44,16 @@ const LoginScreen = ({ onLogin }: { onLogin: (adminKey: string) => void }) => {
   return (
     <View style={styles.loginContainer}>
       <View style={styles.loginBox}>
-        <Text style={styles.title}>Hailey Admin</Text>
+        <Text style={styles.title}>Admin Atelier</Text>
         <Text style={styles.subtitle}>Enter admin key to continue</Text>
         <TextInput
           style={styles.input}
           value={adminKey}
-          onChangeText={setAdminKey}
+          onChangeText={setAdminKeyInput}
           placeholder="Admin Key"
           secureTextEntry
           onSubmitEditing={handleLogin}
+          autoFocus
         />
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>Login</Text>
@@ -113,8 +125,14 @@ const styles = StyleSheet.create({
 });
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentAdminKey, setCurrentAdminKey] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const remembered = storage.get();
+    if (remembered && remembered === ADMIN_KEY) {
+      setAdminKey(remembered);
+      return true;
+    }
+    return false;
+  });
 
   useEffect(() => {
     (async () => {
@@ -124,65 +142,44 @@ export default function App() {
         if (status !== 'granted') {
           Alert.alert(
             'Permission required',
-            'Hailey Admin needs access to your photos to select artwork images.'
+            'Admin Atelier needs access to your photos to select artwork images.'
           );
         }
       }
     })();
   }, []);
 
-  const sharedScreenOptions: NativeStackNavigationOptions = {
-    headerShown: false
-  };
-
-  // Always show login screen first
   if (!isAuthenticated) {
     return (
       <SafeAreaProvider>
-        <LoginScreen 
+        <LoginScreen
           onLogin={(adminKey) => {
-            setCurrentAdminKey(adminKey);
+            setAdminKey(adminKey);
+            storage.set(adminKey);
             setIsAuthenticated(true);
-          }} 
+          }}
         />
       </SafeAreaProvider>
     );
   }
 
-  // Show main app after login
   return (
     <SafeAreaProvider>
       <NavigationContainer
-        // Add web-specific configuration
         {...(Platform.OS === 'web' && {
           documentTitle: {
-            formatter: (options, route) => 
-              `${options?.title ?? route?.name} - Hailey Admin`,
+            formatter: (options, route) => `${options?.title ?? route?.name} - Admin Atelier`,
           },
         })}
       >
-         <Stack.Navigator
-           initialRouteName="List"
-           screenOptions={sharedScreenOptions}
-         >
-           <Stack.Screen
-             name="List"
-             component={ArtworkList}
-             initialParams={{ adminKey: currentAdminKey }}
-           />
-           <Stack.Screen 
-             name="Form" 
-             component={ArtworkForm}
-             initialParams={{ adminKey: currentAdminKey }}
-           />
-           <Stack.Screen 
-             name="ProfileForm" 
-             component={ProfileForm}
-             initialParams={{ adminKey: currentAdminKey }}
-           />
-         </Stack.Navigator>
+        <Stack.Navigator initialRouteName="List" screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="List" component={ArtworkList} options={{ title: 'Artworks' }} />
+          <Stack.Screen name="Form" component={ArtworkForm} options={{ title: 'Artwork' }} />
+          <Stack.Screen name="ProfileForm" component={ProfileForm} options={{ title: 'Profile' }} />
+          <Stack.Screen name="Collections" component={CollectionsScreen} options={{ title: 'Collections' }} />
+          <Stack.Screen name="CollectionDetail" component={CollectionDetailScreen} options={{ title: 'Collection' }} />
+        </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
   );
 }
-  

@@ -1,421 +1,127 @@
-// screens/ProfileForm.tsx
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  ScrollView,
-  View,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  Alert,
-  Text,
-  useColorScheme,
-  Modal,
-} from 'react-native';
+// screens/ProfileForm.tsx: the About page's portrait and description
+import React, { useEffect, useRef, useState } from 'react';
+import { ScrollView, View, TextInput, TouchableOpacity, Image, StyleSheet, Text, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../types';
-import { API_URL } from '../constants';
-import ConfirmationModal from '../components/ConfirmationModal';
+import { getProfile, updateProfile, errorMessage, ApiError } from '../api';
+import { useTheme } from '../theme';
+import { Screen } from '../components/Screen';
+import { Button } from '../components/Button';
+import { useLeaveGuard } from '../components/useLeaveGuard';
 import { prepareImageUpload } from '../utils/prepareImageUpload';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProfileForm'>;
 
-export default function ProfileForm({ route, navigation }: Props) {
-  const isDark = useColorScheme() === 'dark';
-  const { adminKey } = route.params;
+export default function ProfileForm({ navigation }: Props) {
+  const { colors } = useTheme();
 
   const [description, setDescription] = useState('');
+  const [savedDescription, setSavedDescription] = useState('');
   const [uri, setUri] = useState<string | null>(null);
-  const [isNewImage, setIsNewImage] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState<ImagePicker.ImagePickerAsset | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [showDiscardModal, setShowDiscardModal] = useState(false);
-  const [showErrorModal, setShowErrorModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const [asset, setAsset] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const savingRef = useRef(false);
+  const savingRef = useRef(false); // guards against a double tap before React re-renders
+
+  const isDirty = description !== savedDescription || asset !== null;
+  const { leave, modal: leaveModal } = useLeaveGuard(navigation, isDirty);
 
   useEffect(() => {
-    fetchProfile();
+    getProfile()
+      .then((profile) => {
+        setDescription(profile.description || '');
+        setSavedDescription(profile.description || '');
+        setUri(profile.imageUrl);
+      })
+      .catch((e) => setError(errorMessage(e, 'Could not load the profile.')))
+      .finally(() => setLoading(false));
   }, []);
 
-  const fetchProfile = async () => {
-    try {
-      console.log('Attempting to fetch profile from:', `${API_URL}/profile`);
-      console.log('Full API URL:', API_URL);
-      const response = await fetch(`${API_URL}/profile`);
-      console.log('Profile response status:', response.status);
-      const profile = await response.json();
-      
-      setDescription(profile.description || '');
-      if (profile.imageUrl) {
-        const existing = profile.imageUrl.startsWith('http')
-          ? profile.imageUrl
-          : profile.imageUrl; // Supabase Storage returns full URLs
-        setUri(existing);
-      }
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      console.error('Profile error details:', JSON.stringify(error, null, 2));
-      setErrorMessage('Could not load profile data.');
-      setShowErrorModal(true);
-      setIsLoading(false);
-    }
-  };
-
   const pickImage = async () => {
-    const res = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.7,
-    });
+    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
     if (!res.canceled && res.assets?.length) {
-      const asset = res.assets[0];
-      setUri(asset.uri);
-      setIsNewImage(true);
-      setSelectedAsset(asset);
+      setAsset(res.assets[0]);
+      setUri(res.assets[0].uri);
     }
   };
 
-  const submitForm = async () => {
+  const save = async () => {
     if (savingRef.current) return;
     savingRef.current = true;
     setIsSaving(true);
-
-    let upload: { image: string; filename: string } | null = null;
-
-    // Shrink the image to fit the API's size limit if new image selected
-    if (isNewImage && selectedAsset) {
-      try {
-        upload = await prepareImageUpload(selectedAsset, 'profile.jpg');
-      } catch (error) {
-        console.error('Error converting image to base64:', error);
-        setErrorMessage('Failed to process image');
-        setShowErrorModal(true);
-        savingRef.current = false;
-        setIsSaving(false);
-        return;
-      }
-    }
-
-    const payload = {
-      description: description.trim(),
-      ...upload
-    };
-
+    setError('');
     try {
-      const res = await fetch(`${API_URL}/profile`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'x-admin-key': adminKey 
-        },
-        body: JSON.stringify(payload),
-      });
-      
-      if (!res.ok) {
-        const text = await res.text();
-        setErrorMessage(text || `Status ${res.status}`);
-        setShowErrorModal(true);
-        savingRef.current = false;
-        setIsSaving(false);
-        return;
+      const input: { description: string; image?: string; filename?: string } = { description: description.trim() };
+      if (asset) {
+        try {
+          Object.assign(input, await prepareImageUpload(asset, 'profile.jpg'));
+        } catch {
+          throw new ApiError('That photo could not be processed. Try a different image.');
+        }
       }
-      
-      // Get the updated profile data from the response
-      const updatedProfile = await res.json();
-      
-      // Update the form state with the fresh data
-      setDescription(updatedProfile.description || '');
-      if (updatedProfile.imageUrl) {
-        setUri(updatedProfile.imageUrl);
-      }
-      setIsNewImage(false);
-      
-      // Small delay to ensure state updates are applied before navigation
-      setTimeout(() => {
-        navigation.goBack();
-      }, 50);
-    } catch (error) {
-      setErrorMessage('Unable to save profile.');
-      setShowErrorModal(true);
+      await updateProfile(input);
+      leave();
+    } catch (e) {
+      setError(errorMessage(e, 'Could not save the profile.'));
     } finally {
       savingRef.current = false;
       setIsSaving(false);
     }
   };
 
-  const handleSubmit = () => {
-    if (savingRef.current) return;
-    setPendingAction(() => submitForm);
-    setShowConfirmModal(true);
-  };
-
-  const handleBack = () => {
-    setPendingAction(() => () => navigation.goBack());
-    setShowDiscardModal(true);
-  };
-
-  const handleConfirm = () => {
-    setShowConfirmModal(false);
-    setShowDiscardModal(false);
-    if (pendingAction) {
-      pendingAction();
-      setPendingAction(null);
-    }
-  };
-
-  const handleCancel = () => {
-    setShowConfirmModal(false);
-    setShowDiscardModal(false);
-    setShowErrorModal(false);
-    setShowSuccessModal(false);
-    setPendingAction(null);
-  };
-
-  const styles = createStyles(isDark);
-
-  if (isLoading) {
-    return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: styles.container.backgroundColor }]}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading profile...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: styles.container.backgroundColor }]}>
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Back */}
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Text style={styles.backButtonText}>‹ Back</Text>
-        </TouchableOpacity>
+    <Screen title="Profile" onBack={() => navigation.goBack()}>
+      {loading ? (
+        <ActivityIndicator style={{ padding: 24 }} color={colors.primary} />
+      ) : (
+        <ScrollView contentContainerStyle={styles.content}>
+          <Text style={[styles.label, { color: colors.text }]}>Portrait</Text>
+          <TouchableOpacity
+            onPress={pickImage}
+            style={[styles.photo, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            accessibilityRole="button"
+          >
+            {uri ? (
+              <Image source={{ uri }} style={styles.photoImage} resizeMode="contain" />
+            ) : (
+              <Text style={{ color: colors.muted }}>Tap to choose a portrait</Text>
+            )}
+          </TouchableOpacity>
+          <Button small variant="secondary" title={uri ? 'Change Portrait' : 'Choose Portrait'} onPress={pickImage} style={styles.photoButton} />
 
-        {/* Title */}
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Edit Profile</Text>
-          <Text style={styles.subtitle}>Update your portrait and description</Text>
-        </View>
-
-        {/* Description */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Artist Description</Text>
+          <Text style={[styles.label, { color: colors.text }]}>About</Text>
+          <Text style={{ color: colors.muted, marginBottom: 8 }}>Shown on the About page. Line breaks are kept.</Text>
           <TextInput
-            placeholder="Enter your artist description..."
-            placeholderTextColor={styles.placeholder.color}
-            style={[styles.input, styles.textArea]}
             value={description}
             onChangeText={setDescription}
+            placeholder="A few words about you and your work…"
+            placeholderTextColor={colors.muted}
+            style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
             multiline
-            numberOfLines={6}
             textAlignVertical="top"
           />
-          <Text style={styles.helperText}>
-            This will replace the default description on the about page
-          </Text>
-        </View>
 
-        {/* Image picker */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={pickImage}>
-            <Text style={styles.buttonText}>
-              {uri ? 'Change Portrait Photo' : 'Select Portrait Photo'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Preview */}
-        {uri ? (
-          <View style={styles.previewContainer}>
-            <Text style={styles.previewLabel}>Portrait Preview</Text>
-            <Image source={{ uri }} style={styles.preview} />
-          </View>
-        ) : (
-          <View style={styles.placeholderContainer}>
-            <Text style={styles.previewLabel}>Portrait Preview</Text>
-            <View style={styles.placeholderBox}>
-              <Text style={styles.placeholderText}>No portrait selected</Text>
-            </View>
-          </View>
-        )}
-
-        {/* Submit */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, isSaving && styles.buttonDisabled]}
-            onPress={handleSubmit}
-            disabled={isSaving}
-          >
-            <Text style={styles.buttonText}>{isSaving ? 'Saving…' : 'Update Profile'}</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-
-      {/* Confirmation Modal */}
-      <ConfirmationModal
-        visible={showConfirmModal}
-        title="Confirm Update"
-        message="Are you sure you want to update your profile?"
-        onConfirm={handleConfirm}
-        onCancel={handleCancel}
-        confirmText="Update"
-        cancelText="Cancel"
-      />
-
-      {/* Discard Modal */}
-      <ConfirmationModal
-        visible={showDiscardModal}
-        title="Discard changes?"
-        message="Any unsaved changes will be lost."
-        onConfirm={handleConfirm}
-        onCancel={handleCancel}
-        confirmText="Discard"
-        cancelText="Cancel"
-        isDestructive={true}
-      />
-
-      {/* Error Modal */}
-      <ConfirmationModal
-        visible={showErrorModal}
-        title="Error"
-        message={errorMessage}
-        onConfirm={handleCancel}
-        onCancel={handleCancel}
-        confirmText="OK"
-        cancelText="Cancel"
-      />
-
-      {/* Success Modal */}
-      <ConfirmationModal
-        visible={showSuccessModal}
-        title="Success"
-        message={successMessage}
-        onConfirm={handleCancel}
-        onCancel={handleCancel}
-        confirmText="OK"
-        cancelText="Cancel"
-      />
-    </SafeAreaView>
+          {error ? <Text style={{ color: colors.danger, marginTop: 16 }}>{error}</Text> : null}
+          <Button
+            title={isSaving ? 'Saving…' : 'Save Changes'}
+            onPress={save}
+            disabled={isSaving || !isDirty}
+            style={{ marginTop: 16 }}
+          />
+        </ScrollView>
+      )}
+      {leaveModal}
+    </Screen>
   );
 }
 
-const createStyles = (isDark: boolean) =>
-  StyleSheet.create({
-    safeArea: { flex: 1 },
-    container: {
-      flexGrow: 1,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-      backgroundColor: isDark ? '#121212' : '#fff',
-    },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    loadingText: {
-      color: isDark ? '#fff' : '#000',
-      fontSize: 16,
-    },
-    backButton: {
-      alignSelf: 'flex-start',
-      marginBottom: 8,
-    },
-    backButtonText: {
-      color: isDark ? '#0A84FF' : '#007AFF',
-      fontSize: 14,
-      fontWeight: '600',
-    },
-    titleContainer: {
-      marginBottom: 24,
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: isDark ? '#fff' : '#000',
-      marginBottom: 4,
-    },
-    subtitle: {
-      fontSize: 14,
-      color: isDark ? '#888' : '#666',
-    },
-    inputGroup: { marginBottom: 16 },
-    label: {
-      marginBottom: 8,
-      color: isDark ? '#fff' : '#000',
-      fontWeight: '600',
-      fontSize: 16,
-    },
-    input: {
-      backgroundColor: isDark ? '#1E1E1E' : '#f2f2f2',
-      color: isDark ? '#fff' : '#000',
-      borderWidth: 1,
-      borderColor: isDark ? '#333' : '#ccc',
-      borderRadius: 8,
-      padding: 12,
-      fontSize: 14,
-    },
-    textArea: {
-      height: 120,
-      textAlignVertical: 'top',
-    },
-    placeholder: { color: isDark ? '#888' : '#888' },
-    helperText: {
-      color: isDark ? '#888' : '#666',
-      fontSize: 12,
-      marginTop: 4,
-    },
-    previewContainer: {
-      marginVertical: 16,
-    },
-    placeholderContainer: {
-      marginVertical: 16,
-    },
-    previewLabel: {
-      marginBottom: 8,
-      color: isDark ? '#fff' : '#000',
-      fontWeight: '600',
-      fontSize: 16,
-    },
-    preview: {
-      width: '100%',
-      height: 200,
-      borderRadius: 8,
-    },
-    placeholderBox: {
-      width: '100%',
-      height: 200,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: isDark ? '#333' : '#ccc',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    placeholderText: {
-      color: isDark ? '#888' : '#888',
-      fontSize: 14,
-    },
-    buttonContainer: { marginVertical: 8 },
-    button: {
-      backgroundColor: isDark ? '#0A84FF' : '#007AFF',
-      paddingVertical: 12,
-      borderRadius: 8,
-      alignItems: 'center',
-    },
-    buttonDisabled: {
-      opacity: 0.5,
-    },
-    buttonText: {
-      color: '#fff',
-      fontSize: 16,
-      fontWeight: '600',
-    },
-  }); 
+const styles = StyleSheet.create({
+  content: { padding: 16, paddingBottom: 48 },
+  label: { fontWeight: '600', fontSize: 15, marginBottom: 6, marginTop: 8 },
+  photo: { height: 280, borderRadius: 8, borderWidth: 1, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  photoImage: { width: '100%', height: '100%' },
+  photoButton: { alignSelf: 'flex-start', marginTop: 8, marginBottom: 16 },
+  input: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 16, minHeight: 200 },
+});

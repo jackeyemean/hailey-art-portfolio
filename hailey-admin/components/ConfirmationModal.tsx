@@ -1,17 +1,19 @@
 // components/ConfirmationModal.tsx
 import React from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, useColorScheme } from 'react-native';
+import { Modal, View, Text, StyleSheet } from 'react-native';
+import { useTheme } from '../theme';
+import { Button } from './Button';
 
 // Custom confirmation modal for web compatibility (Alert.alert has no buttons on web)
-export default function ConfirmationModal({ 
-  visible, 
-  title, 
-  message, 
-  onConfirm, 
-  onCancel, 
+export default function ConfirmationModal({
+  visible,
+  title,
+  message,
+  onConfirm,
+  onCancel,
   confirmText = 'Confirm',
   cancelText = 'Cancel',
-  isDestructive = false 
+  isDestructive = false,
 }: {
   visible: boolean;
   title: string;
@@ -22,89 +24,28 @@ export default function ConfirmationModal({
   cancelText?: string;
   isDestructive?: boolean;
 }) {
-  const isDark = useColorScheme() === 'dark';
-  
-  const modalStyles = StyleSheet.create({
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    modalContent: {
-      margin: 20,
-      borderRadius: 12,
-      padding: 24,
-      minWidth: 300,
-      maxWidth: 400,
-    },
-    modalTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      marginBottom: 12,
-    },
-    modalMessage: {
-      fontSize: 16,
-      marginBottom: 24,
-      lineHeight: 22,
-    },
-    modalButtons: {
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-      gap: 12,
-    },
-    modalButton: {
-      paddingVertical: 8,
-      paddingHorizontal: 16,
-      borderRadius: 6,
-      minWidth: 60,
-      alignItems: 'center',
-    },
-    modalButtonSecondary: {
-      backgroundColor: 'transparent',
-    },
-    modalButtonPrimary: {
-      backgroundColor: '#007AFF',
-    },
-    modalButtonText: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: '#fff',
-    },
-  });
-  
+  const { colors, isDark } = useTheme();
+
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-    >
-      <View style={modalStyles.modalOverlay}>
-        <View style={[modalStyles.modalContent, { backgroundColor: isDark ? '#1E1E1E' : '#fff' }]}>
-          <Text style={[modalStyles.modalTitle, { color: isDark ? '#fff' : '#000' }]}>{title}</Text>
-          <Text style={[modalStyles.modalMessage, { color: isDark ? '#ccc' : '#666' }]}>{message}</Text>
-          <View style={modalStyles.modalButtons}>
-            <TouchableOpacity 
-              style={[modalStyles.modalButton, modalStyles.modalButtonSecondary]} 
-              onPress={onCancel}
-            >
-              <Text style={[modalStyles.modalButtonText, { color: isDark ? '#0A84FF' : '#007AFF' }]}>
-                {cancelText}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[
-                modalStyles.modalButton, 
-                modalStyles.modalButtonPrimary,
-                isDestructive && { backgroundColor: '#FF3B30' }
-              ]} 
-              onPress={onConfirm}
-            >
-              <Text style={modalStyles.modalButtonText}>{confirmText}</Text>
-            </TouchableOpacity>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
+      <View style={styles.overlay}>
+        <View style={[styles.content, { backgroundColor: isDark ? colors.surface : colors.background }]} accessibilityRole="alert">
+          <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+          <Text style={[styles.message, { color: colors.muted }]}>{message}</Text>
+          <View style={styles.buttons}>
+            <Button variant="secondary" title={cancelText} onPress={onCancel} />
+            <Button variant={isDestructive ? 'danger' : 'primary'} title={confirmText} onPress={onConfirm} />
           </View>
         </View>
       </View>
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'center', alignItems: 'center' },
+  content: { margin: 20, borderRadius: 12, padding: 24, minWidth: 300, maxWidth: 400 },
+  title: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
+  message: { fontSize: 16, marginBottom: 24, lineHeight: 22 },
+  buttons: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },
+});
