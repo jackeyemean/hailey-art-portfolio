@@ -13,6 +13,8 @@ import ConfirmationModal from '../components/ConfirmationModal';
 type Props = NativeStackScreenProps<RootStackParamList, 'Publish'>;
 
 const LIVE_SITE_URL = 'https://www.haileyatelier.art';
+// Vercel's fixed address for the latest build of the `preview` branch
+const PREVIEW_SITE_URL = 'https://hailey-art-git-preview-jackeyemeans-projects.vercel.app';
 const POLL_MS = 5000;
 
 type Tone = 'muted' | 'progress' | 'ready' | 'warning' | 'danger';
@@ -126,9 +128,12 @@ export default function PublishScreen({ navigation }: Props) {
                   You've saved changes since this preview was made. Sync Preview again to include them.
                 </Text>
               ) : null}
-              {status.preview.state === 'ready' && status.preview.url ? (
-                <Button variant="secondary" title="Open Preview" onPress={() => Linking.openURL(status.preview.url!)} />
-              ) : null}
+              <Button
+                variant="secondary"
+                title="Open Preview"
+                onPress={() => Linking.openURL(status.preview.url || PREVIEW_SITE_URL)}
+                disabled={previewWorking}
+              />
               <Button
                 title={busy === 'preview' ? 'Starting…' : hasPreview && !previewWorking ? 'Sync Preview Again' : 'Sync Preview'}
                 onPress={() => run('preview')}
