@@ -12,7 +12,7 @@ import ConfirmationModal from '../components/ConfirmationModal';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Publish'>;
 
-const LIVE_SITE_URL = 'https://hailey-art.vercel.app';
+const LIVE_SITE_URL = 'https://www.haileyatelier.art';
 const POLL_MS = 5000;
 
 type Tone = 'muted' | 'progress' | 'ready' | 'warning' | 'danger';
@@ -127,7 +127,7 @@ export default function PublishScreen({ navigation }: Props) {
                 </Text>
               ) : null}
               {status.preview.state === 'ready' && status.preview.url ? (
-                <Button variant="secondary" title="Open Preview ↗" onPress={() => Linking.openURL(status.preview.url!)} />
+                <Button variant="secondary" title="Open Preview" onPress={() => Linking.openURL(status.preview.url!)} />
               ) : null}
               <Button
                 title={busy === 'preview' ? 'Starting…' : hasPreview && !previewWorking ? 'Sync Preview Again' : 'Sync Preview'}
@@ -143,7 +143,7 @@ export default function PublishScreen({ navigation }: Props) {
                 {live!.tone === 'progress' ? <ActivityIndicator size="small" color={colors.primary} /> : null}
                 <Text style={[styles.statusText, { color: toneColor(live!.tone) }]}>{live!.text}</Text>
               </View>
-              <Button variant="secondary" title="Open Live Site ↗" onPress={() => Linking.openURL(LIVE_SITE_URL)} />
+              <Button variant="secondary" title="Open haileyatelier.art" onPress={() => Linking.openURL(LIVE_SITE_URL)} />
               <Button
                 title={busy === 'live' ? 'Publishing…' : 'Sync Live'}
                 onPress={() => setConfirmLive(true)}
