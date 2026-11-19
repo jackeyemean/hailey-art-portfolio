@@ -2,7 +2,7 @@
   {
     "name": "2026",
     "slug": "2026",
-    "count": 26,
+    "count": 33,
     "thumbnail": "/data/images/1794701483844-Sun-on-Alps.webp",
     "artworkIds": [
       "2f29ade9-81e3-4e56-bd3a-07b05dcd81d3",
@@ -22,6 +22,13 @@
       "6e1c8ae7-5f65-47e4-a286-5f03c92235da",
       "803fab03-d43c-435b-aff7-ad350f437b8f",
       "9493d91d-6bbc-4f9f-addb-34f269a81f18",
+      "4220be8a-0c1c-4935-9e6c-817f1482740f",
+      "bad400f7-e7bd-4f8b-af3f-298bed26dbac",
+      "15a4d244-d596-4880-9b3a-9e1b30abbee5",
+      "9b33161f-aadc-48d3-a035-0dd3f91ff273",
+      "3e30bc17-7b17-4155-a319-a39237671d37",
+      "2e736173-346d-4ca2-9126-106180644f4e",
+      "23cc9fd6-6a5e-4afd-84aa-590ad977e544",
       "5f10d929-7fe5-4e97-bbf3-a32f07ce8805",
       "b87a83fa-fea6-4323-99ab-428c77c9c956",
       "32ca06f8-e4f2-4bf7-8436-2463db6348dc",
@@ -58,7 +65,7 @@
   {
     "name": "30 in 30",
     "slug": "30-in-30",
-    "count": 9,
+    "count": 16,
     "thumbnail": "/data/images/1794703636232-Hibernation.webp",
     "artworkIds": [
       "d953dcbd-e5d1-4c50-b458-8436fe9187a6",
@@ -69,7 +76,14 @@
       "69529d50-535d-4f8d-862f-14fa526922ea",
       "32ca06f8-e4f2-4bf7-8436-2463db6348dc",
       "b87a83fa-fea6-4323-99ab-428c77c9c956",
-      "5f10d929-7fe5-4e97-bbf3-a32f07ce8805"
+      "5f10d929-7fe5-4e97-bbf3-a32f07ce8805",
+      "4220be8a-0c1c-4935-9e6c-817f1482740f",
+      "bad400f7-e7bd-4f8b-af3f-298bed26dbac",
+      "15a4d244-d596-4880-9b3a-9e1b30abbee5",
+      "9b33161f-aadc-48d3-a035-0dd3f91ff273",
+      "3e30bc17-7b17-4155-a319-a39237671d37",
+      "2e736173-346d-4ca2-9126-106180644f4e",
+      "23cc9fd6-6a5e-4afd-84aa-590ad977e544"
     ]
   },
   {

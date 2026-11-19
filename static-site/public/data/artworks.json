@@ -1,5 +1,110 @@
 [
   {
+    "id": "4220be8a-0c1c-4935-9e6c-817f1482740f",
+    "title": "Havel Market Prague",
+    "description": "16/30 - 30 paintings in 30 days. A photo I took of a market in Prague, which dates back to the Middle Ages.",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1795109521394-Havel%20Market%20Prague.webp",
+    "localImagePath": "/data/images/1795109521394-Havel-Market-Prague.webp",
+    "collections": [
+      "2026",
+      "30 in 30"
+    ],
+    "medium": "Acrylic on canvas",
+    "dimensions": "8\" x 8\"",
+    "createdAt": "2026-11-19T17:32:01.698195+00:00",
+    "isArtistPick": false
+  },
+  {
+    "id": "bad400f7-e7bd-4f8b-af3f-298bed26dbac",
+    "title": "Copper Bouquet",
+    "description": "11/30 - 30 paintings in 30 days. A friend's photo of a bouquet in Greece, summer 2025.",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1795109451061-DSCN0844.webp",
+    "localImagePath": "/data/images/1795109451061-DSCN0844.webp",
+    "collections": [
+      "2026",
+      "30 in 30"
+    ],
+    "medium": "Acrylic on canvas",
+    "dimensions": "8\" x 8\"",
+    "createdAt": "2026-11-19T17:30:51.31508+00:00",
+    "isArtistPick": false
+  },
+  {
+    "id": "15a4d244-d596-4880-9b3a-9e1b30abbee5",
+    "title": "Grindelwald",
+    "description": "15/30 - 30 paintings in 30 days. A photo from my visit to Grindelwald, Switzerland, April 2026. The imposing mountains on the charming town was one of my favourite day trips in the country.",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1795109327235-Grindelwald.webp",
+    "localImagePath": "/data/images/1795109327235-Grindelwald.webp",
+    "collections": [
+      "2026",
+      "30 in 30"
+    ],
+    "medium": "Acrylic on canvas",
+    "dimensions": "8\" x 8\"",
+    "createdAt": "2026-11-19T17:28:47.504882+00:00",
+    "isArtistPick": false
+  },
+  {
+    "id": "9b33161f-aadc-48d3-a035-0dd3f91ff273",
+    "title": "Golden Pavillion",
+    "description": "14/30 - 30 paintings in 30 days. A friend's photo from her trip to Kyoto, Japan.",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1795109217436-Golden%20Pavillion.webp",
+    "localImagePath": "/data/images/1795109217436-Golden-Pavillion.webp",
+    "collections": [
+      "2026",
+      "30 in 30"
+    ],
+    "medium": "Acrylic on canvas",
+    "dimensions": "8\" x 8\"",
+    "createdAt": "2026-11-19T17:26:57.652911+00:00",
+    "isArtistPick": false
+  },
+  {
+    "id": "3e30bc17-7b17-4155-a319-a39237671d37",
+    "title": "Evening Walk at the Pond",
+    "description": "13/30 - 30 paintings in 30 days. A friend's photo from a walk in suburban Ontario.",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1795109174214-Evening%20Walk.webp",
+    "localImagePath": "/data/images/1795109174214-Evening-Walk.webp",
+    "collections": [
+      "2026",
+      "30 in 30"
+    ],
+    "medium": "Acrylic on canvas",
+    "dimensions": "8\" x 8\"",
+    "createdAt": "2026-11-19T17:26:14.472492+00:00",
+    "isArtistPick": false
+  },
+  {
+    "id": "2e736173-346d-4ca2-9126-106180644f4e",
+    "title": "Purple Leather",
+    "description": "12/30 - 30 paintings in 30 days. A leather purse",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1795109098418-Leather%20Bag.webp",
+    "localImagePath": "/data/images/1795109098418-Leather-Bag.webp",
+    "collections": [
+      "2026",
+      "30 in 30"
+    ],
+    "medium": "Acrylic on canvas",
+    "dimensions": "8\" x 8\"",
+    "createdAt": "2026-11-19T17:24:58.692877+00:00",
+    "isArtistPick": false
+  },
+  {
+    "id": "23cc9fd6-6a5e-4afd-84aa-590ad977e544",
+    "title": "London Town",
+    "description": "10/30 - 30 paintings in 30 days. A friend's photo in London, England.",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1795108995103-London%20Town.webp",
+    "localImagePath": "/data/images/1795108995103-London-Town.webp",
+    "collections": [
+      "2026",
+      "30 in 30"
+    ],
+    "medium": "Acrylic on canvas",
+    "dimensions": "8\" x 8\"",
+    "createdAt": "2026-11-19T17:23:15.395649+00:00",
+    "isArtistPick": false
+  },
+  {
     "id": "5f10d929-7fe5-4e97-bbf3-a32f07ce8805",
     "title": "Grape Sundae",
     "description": "9/30 - 30 paintings in 30 days. 2/2 of sundae paintings.",
