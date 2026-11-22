@@ -1,5 +1,50 @@
 [
   {
+    "id": "380f8095-c0ab-475c-89d4-18bcbc58ed08",
+    "title": "Promenade in Lyon",
+    "description": "19/30 - 30 paintings in 30 days. An arrondissement in Lyon by the river Saône. Photo taken on my first time in France, delirious after a seven-hour Flixbus ride.",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1795371346312-Promenade%20in%20Lyon.webp",
+    "localImagePath": "/data/images/1795371346312-Promenade-in-Lyon.webp",
+    "collections": [
+      "2026",
+      "30 in 30"
+    ],
+    "medium": "Acrylic on canvas",
+    "dimensions": "8\" x 8\"",
+    "createdAt": "2026-11-22T18:15:46.817405+00:00",
+    "isArtistPick": false
+  },
+  {
+    "id": "d5336108-aa94-4415-afcd-f306f236aa00",
+    "title": "A Winding Countryside Road",
+    "description": "18/30 - 30 paintings in 30 days. A photo I took of the farmland past the Greater Toronto Area.",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1795371095174-Heading%20North.webp",
+    "localImagePath": "/data/images/1795371095174-Heading-North.webp",
+    "collections": [
+      "2026",
+      "30 in 30"
+    ],
+    "medium": "Acrylic on canvas",
+    "dimensions": "8\" x 8\"",
+    "createdAt": "2026-11-22T18:11:35.678651+00:00",
+    "isArtistPick": false
+  },
+  {
+    "id": "50fc830f-824b-4e3e-8c69-3c1c8e5d729a",
+    "title": "Appenzell in Rain",
+    "description": "17/30 - 30 paintings in 30 days. My first time in quaint Appenzell, Switzerland, a train ride away from my exchange city of St. Gallen.",
+    "imageUrl": "https://ozvgykzltkpsyifdqjtg.supabase.co/storage/v1/object/public/artwork-images/artworks/1795370708276-Appenzell%20in%20Rain.webp",
+    "localImagePath": "/data/images/1795370708276-Appenzell-in-Rain.webp",
+    "collections": [
+      "2026",
+      "30 in 30"
+    ],
+    "medium": "Acrylic on canvas",
+    "dimensions": "8\" x 8\"",
+    "createdAt": "2026-11-22T18:05:08.80866+00:00",
+    "isArtistPick": false
+  },
+  {
     "id": "4220be8a-0c1c-4935-9e6c-817f1482740f",
     "title": "Havel Market Prague",
     "description": "16/30 - 30 paintings in 30 days. A photo I took of a market in Prague, which dates back to the Middle Ages.",
